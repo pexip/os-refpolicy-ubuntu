@@ -1,0 +1,33 @@
+---
+ policy/modules/services/ssh.if |   18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+Index: refpolicy/policy/modules/services/ssh.if
+===================================================================
+--- refpolicy.orig/policy/modules/services/ssh.if
++++ refpolicy/policy/modules/services/ssh.if
+@@ -535,6 +535,24 @@ template(`ssh_server_template', `
+ 
+ ########################################
+ ## <summary>
++##	Write to ssh server files (e.g. /proc/pid/oom_adj).
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++#
++interface(`ssh_write_sshd',`
++	gen_require(`
++		type sshd_t;
++	')
++
++	allow $1 sshd_t:file write;
++')
++
++########################################
++## <summary>
+ ##	Send a SIGCHLD signal to the ssh server.
+ ## </summary>
+ ## <param name="domain">

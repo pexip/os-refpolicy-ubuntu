@@ -1,0 +1,15 @@
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/fstools.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/fstools.te	2010-04-22 17:31:47.230414885 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/fstools.te	2010-04-22 17:45:08.300482379 -0700
+@@ -135,6 +135,10 @@
+ 
+ term_use_console(fsadm_t)
+ 
++# checkfs.sh mktemps a file for fsck to use as progress output
++init_rw_script_tmp_files(fsadm_t)
++# checkroot.sh mktemps a file under /var/run for fsck to use as progress output
++init_write_utmp(fsadm_t)
+ init_use_fds(fsadm_t)
+ init_use_script_ptys(fsadm_t)
+ init_dontaudit_getattr_initctl(fsadm_t)

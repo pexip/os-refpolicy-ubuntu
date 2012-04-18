@@ -1,0 +1,152 @@
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/devicekit.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/devicekit.fc	2010-04-22 17:31:46.580663748 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/devicekit.fc	2010-04-22 17:45:08.590648152 -0700
+@@ -6,3 +6,8 @@
+ 
+ /var/run/devkit(/.*)?			gen_context(system_u:object_r:devicekit_var_run_t,s0)
+ /var/run/DeviceKit-disk(/.*)?		gen_context(system_u:object_r:devicekit_var_run_t,s0)
++
++/usr/lib/udisks/udisks-daemon	--	gen_context(system_u:object_r:devicekit_disk_exec_t,s0)
++/usr/lib/upower/upowerd		--	gen_context(system_u:object_r:devicekit_power_exec_t,s0)
++
++/var/lib/udisks(/.*)?			gen_context(system_u:object_r:devicekit_var_lib_t,s0)
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/devicekit.if
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/devicekit.if	2010-04-22 17:31:46.570632991 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/devicekit.if	2010-04-22 17:45:08.590648152 -0700
+@@ -20,6 +20,43 @@
+ 
+ ########################################
+ ## <summary>
++##	Execute a domain transition to run devicekit power.
++## </summary>
++## <param name="domain">
++## <summary>
++##	Domain allowed to transition.
++## </summary>
++## </param>
++#
++interface(`devicekit_domtrans_power',`
++	gen_require(`
++		type devicekit_power_t, devicekit_power_exec_t;
++	')
++
++	domtrans_pattern($1, devicekit_power_exec_t, devicekit_power_t)
++')
++
++########################################
++## <summary>
++##	Execute a domain transition to run devicekit disk.
++## </summary>
++## <param name="domain">
++## <summary>
++##	Domain allowed to transition.
++## </summary>
++## </param>
++#
++interface(`devicekit_domtrans_disk',`
++	gen_require(`
++		type devicekit_disk_t, devicekit_disk_exec_t;
++	')
++
++	domtrans_pattern($1, devicekit_disk_exec_t, devicekit_disk_t)
++')
++
++
++########################################
++## <summary>
+ ##	Send to devicekit over a unix domain
+ ##	datagram socket.
+ ## </summary>
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/devicekit.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/devicekit.te	2010-04-22 17:31:46.590466460 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/devicekit.te	2010-04-22 17:45:08.590648152 -0700
+@@ -60,8 +60,11 @@
+ # DeviceKit disk local policy
+ #
+ 
++allow devicekit_disk_t self:process getsched;
+ allow devicekit_disk_t self:capability { chown dac_override fowner fsetid sys_nice sys_ptrace sys_rawio };
+ allow devicekit_disk_t self:fifo_file rw_fifo_file_perms;
++allow devicekit_disk_t self:unix_stream_socket create_socket_perms;
++allow devicekit_disk_t self:netlink_kobject_uevent_socket create_socket_perms;
+ 
+ manage_dirs_pattern(devicekit_disk_t, devicekit_tmp_t, devicekit_tmp_t)
+ manage_files_pattern(devicekit_disk_t, devicekit_tmp_t, devicekit_tmp_t)
+@@ -71,6 +74,10 @@
+ manage_files_pattern(devicekit_disk_t, devicekit_var_lib_t, devicekit_var_lib_t)
+ files_var_lib_filetrans(devicekit_disk_t, devicekit_var_lib_t, dir)
+ 
++manage_dirs_pattern(devicekit_disk_t, devicekit_var_run_t, devicekit_var_run_t)
++manage_files_pattern(devicekit_disk_t, devicekit_var_run_t, devicekit_var_run_t)
++files_pid_filetrans(devicekit_disk_t, devicekit_var_run_t, { file dir })
++
+ kernel_read_software_raid_state(devicekit_disk_t)
+ kernel_setsched(devicekit_disk_t)
+ 
+@@ -127,6 +134,10 @@
+ 	optional_policy(`
+ 		consolekit_dbus_chat(devicekit_disk_t)
+ 	')
++
++	optional_policy(`
++		unconfined_dbus_chat(devicekit_disk_t)
++	')
+ ')
+ 
+ optional_policy(`
+@@ -139,14 +150,21 @@
+ # DeviceKit-Power local policy
+ #
+ 
++allow devicekit_power_t self:process getsched;
+ allow devicekit_power_t self:capability { dac_override sys_tty_config sys_nice sys_ptrace };
+ allow devicekit_power_t self:fifo_file rw_fifo_file_perms;
+ allow devicekit_power_t self:unix_dgram_socket create_socket_perms;
++allow devicekit_power_t self:unix_stream_socket create_socket_perms;
++allow devicekit_power_t self:netlink_kobject_uevent_socket create_socket_perms;
+ 
+ manage_dirs_pattern(devicekit_power_t, devicekit_var_lib_t, devicekit_var_lib_t)
+ manage_files_pattern(devicekit_power_t, devicekit_var_lib_t, devicekit_var_lib_t)
+ files_var_lib_filetrans(devicekit_power_t, devicekit_var_lib_t, dir)
+ 
++manage_dirs_pattern(devicekit_power_t, devicekit_var_run_t, devicekit_var_run_t)
++manage_files_pattern(devicekit_power_t, devicekit_var_run_t, devicekit_var_run_t)
++files_pid_filetrans(devicekit_power_t, devicekit_var_run_t, { file dir })
++
+ kernel_read_network_state(devicekit_power_t)
+ kernel_read_system_state(devicekit_power_t)
+ kernel_rw_hotplug_sysctls(devicekit_power_t)
+@@ -189,12 +207,20 @@
+ 	')
+ 
+ 	optional_policy(`
++		policykit_dbus_chat(devicekit_power_t)
++	')
++
++	optional_policy(`
+ 		networkmanager_dbus_chat(devicekit_power_t)
+ 	')
+ 
+ 	optional_policy(`
+ 		rpm_dbus_chat(devicekit_power_t)
+ 	')
++
++	optional_policy(`
++		unconfined_dbus_chat(devicekit_power_t)
++	')
+ ')
+ 
+ optional_policy(`
+@@ -215,5 +241,9 @@
+ ')
+ 
+ optional_policy(`
++	udev_read_db(devicekit_power_t)
++')
++
++optional_policy(`
+ 	vbetool_domtrans(devicekit_power_t)
+ ')

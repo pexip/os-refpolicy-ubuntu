@@ -1,0 +1,46 @@
+fstools should be in an optional
+hal wants to setattr sound_device_t and removable_device_t so, in
+ anticipation of it trying to setattr more devices, i allowed it to
+ setattr all character and block devices
+the var_lib and var_run access is happening as a result of PolicyKit
+---
+ policy/modules/services/hal.te |   11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/hal.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/hal.te	2010-04-22 17:31:48.109142744 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/hal.te	2010-04-22 17:45:08.050699470 -0700
+@@ -122,6 +122,8 @@
+ dev_rw_printer(hald_t)
+ dev_read_lvm_control(hald_t)
+ dev_getattr_all_chr_files(hald_t)
++dev_setattr_all_chr_files(hald_t)
++dev_setattr_all_blk_files(hald_t)
+ dev_manage_generic_chr_files(hald_t)
+ dev_rw_generic_usb_dev(hald_t)
+ dev_setattr_generic_usb_dev(hald_t)
+@@ -143,7 +145,11 @@
+ files_manage_mnt_files(hald_t)
+ files_manage_mnt_symlinks(hald_t)
+ files_search_var_lib(hald_t)
++# reading /var/lib/misc/PolicyKit.reload and /var/lib/misc/usb.ids
++files_read_var_lib_files(hald_t)
+ files_read_usr_files(hald_t)
++# /usr/lib/polkit-read-auth is doing this for /var/run/PolicyKit/user-USERNAME.auths
++files_read_generic_pids(hald_t)
+ # hal is now execing pm-suspend
+ files_create_boot_flag(hald_t)
+ files_getattr_all_dirs(hald_t)
+@@ -297,6 +303,11 @@
+ ')
+ 
+ optional_policy(`
++	policykit_read_lib(hald_t)
++	policykit_read_pid_files(hald_t)
++')
++
++optional_policy(`
+ 	rpc_search_nfs_state_data(hald_t)
+ ')
+ 

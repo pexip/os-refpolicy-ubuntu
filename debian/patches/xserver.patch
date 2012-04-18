@@ -1,0 +1,104 @@
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/xserver.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/xserver.fc	2010-04-22 17:31:48.389268554 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/xserver.fc	2010-04-22 17:45:07.940487085 -0700
+@@ -9,6 +9,14 @@
+ HOME_DIR/\.xauth.*	--	gen_context(system_u:object_r:xauth_home_t,s0)
+ HOME_DIR/\.Xauthority.*	--	gen_context(system_u:object_r:xauth_home_t,s0)
+ 
++/root/\.fonts\.conf	--	gen_context(unconfined_u:object_r:user_fonts_config_t,s0)
++/root/\.fonts(/.*)?		gen_context(unconfined_u:object_r:user_fonts_t,s0)
++/root/\.fonts/auto(/.*)?	gen_context(unconfined_u:object_r:user_fonts_cache_t,s0)
++/root/\.fonts\.cache-.* --	gen_context(unconfined_u:object_r:user_fonts_cache_t,s0)
++/root/\.ICEauthority.* --	gen_context(unconfined_u:object_r:iceauth_home_t,s0)
++/root/\.xauth.*	--	gen_context(unconfined_u:object_r:xauth_home_t,s0)
++/root/\.Xauthority.*	--	gen_context(unconfined_u:object_r:xauth_home_t,s0)
++
+ #
+ # /dev
+ #
+@@ -20,10 +28,10 @@
+ 
+ /etc/init\.d/xfree86-common --	gen_context(system_u:object_r:xserver_exec_t,s0)
+ 
+-/etc/kde3?/kdm/Xstartup	--	gen_context(system_u:object_r:xsession_exec_t,s0)
+-/etc/kde3?/kdm/Xreset	--	gen_context(system_u:object_r:xsession_exec_t,s0)
+-/etc/kde3?/kdm/Xsession	--	gen_context(system_u:object_r:xsession_exec_t,s0)
+-/etc/kde3?/kdm/backgroundrc	gen_context(system_u:object_r:xdm_var_run_t,s0)
++/etc/kde[34]?/kdm/Xstartup	--	gen_context(system_u:object_r:xsession_exec_t,s0)
++/etc/kde[34]?/kdm/Xreset	--	gen_context(system_u:object_r:xsession_exec_t,s0)
++/etc/kde[34]?/kdm/Xsession	--	gen_context(system_u:object_r:xsession_exec_t,s0)
++/etc/kde[34]?/kdm/backgroundrc	gen_context(system_u:object_r:xdm_var_run_t,s0)
+ 
+ /etc/X11/[wx]dm/Xreset.* --	gen_context(system_u:object_r:xsession_exec_t,s0)
+ /etc/X11/[wxg]dm/Xsession --	gen_context(system_u:object_r:xsession_exec_t,s0)
+@@ -32,10 +40,9 @@
+ /etc/X11/wdm/Xstartup.*	--	gen_context(system_u:object_r:xsession_exec_t,s0)
+ /etc/X11/Xsession[^/]*	--	gen_context(system_u:object_r:xsession_exec_t,s0)
+ 
+-ifdef(`distro_redhat',`
+ /etc/gdm/PostSession/.*	--	gen_context(system_u:object_r:xsession_exec_t,s0)
+ /etc/gdm/PreSession/.*	--	gen_context(system_u:object_r:xsession_exec_t,s0)
+-')
++/etc/gdm/Xsession	--	gen_context(system_u:object_r:xsession_exec_t,s0)
+ 
+ #
+ # /opt
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/xserver.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/xserver.te	2010-04-22 17:31:48.409268514 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/xserver.te	2010-04-22 17:45:07.940487085 -0700
+@@ -467,6 +467,7 @@
+ 
+ userdom_dontaudit_use_unpriv_user_fds(xdm_t)
+ userdom_create_all_users_keys(xdm_t)
++userdom_dbus_chat_all_users(xdm_t)
+ # for .dmrc
+ userdom_read_user_home_content_files(xdm_t)
+ # Search /proc for any user domain processes.
+@@ -515,6 +516,10 @@
+ ')
+ 
+ optional_policy(`
++	devicekit_dbus_chat_power(xdm_t)
++')
++
++optional_policy(`
+ 	# Talk to the console mouse server.
+ 	gpm_stream_connect(xdm_t)
+ 	gpm_setattr_gpmctl(xdm_t)
+@@ -542,6 +547,10 @@
+ ')
+ 
+ optional_policy(`
++	rtkit_daemon_dbus_chat(xdm_t)
++')
++
++optional_policy(`
+ 	seutil_sigchld_newrole(xdm_t)
+ ')
+ 
+@@ -552,6 +561,7 @@
+ optional_policy(`
+ 	unconfined_domain(xdm_t)
+ 	unconfined_domtrans(xdm_t)
++	unconfined_dbus_connect(xdm_t)
+ 
+ 	ifndef(`distro_redhat',`
+ 		allow xdm_t self:process { execheap execmem };
+@@ -727,6 +737,7 @@
+ # read x_contexts
+ seutil_read_default_contexts(xserver_t)
+ 
++userdom_dbus_chat_all_users(xserver_t)
+ userdom_search_user_home_dirs(xserver_t)
+ userdom_use_user_ttys(xserver_t)
+ userdom_setattr_user_ttys(xserver_t)
+@@ -846,6 +857,7 @@
+ optional_policy(`
+ 	dbus_system_bus_client(xserver_t)
+ 	hal_dbus_chat(xserver_t)
++	hal_dbus_chat(xdm_t)
+ ')
+ 
+ optional_policy(`

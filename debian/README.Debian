@@ -1,0 +1,8 @@
+It would be useful for most users to be familiar with policycoreutils
+tools in order to manipulate policies installed on the
+system. Specifically, it is useful to be familiar with:
+ semodule(8)    - Manage SELinux policy modules.
+ load_policy(8) - load a new policy into the kernel
+
+
+ -- Manoj Srivastava <srivasta@debian.org>, Tue,  9 May 2006 14:07:31 -0500

@@ -1,0 +1,17 @@
+---
+ policy/users |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/users
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/users	2010-04-22 17:31:48.449144421 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/users	2010-04-22 17:45:07.930404529 -0700
+@@ -29,7 +29,7 @@
+ gen_user(sysadm_u, sysadm, sysadm_r, s0, s0 - mls_systemhigh, mcs_allcats)
+ 
+ # Until order dependence is fixed for users:
+-gen_user(unconfined_u, unconfined, unconfined_r, s0, s0 - mls_systemhigh, mcs_allcats)
++gen_user(unconfined_u, unconfined, unconfined_r system_r, s0, s0 - mls_systemhigh, mcs_allcats)
+ 
+ #
+ # The following users correspond to Unix identities.

@@ -1,0 +1,25 @@
+---
+ policy/modules/services/xserver.te |   10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+Index: refpolicy/policy/modules/services/xserver.te
+===================================================================
+--- refpolicy.orig/policy/modules/services/xserver.te
++++ refpolicy/policy/modules/services/xserver.te
+@@ -307,6 +307,16 @@ optional_policy(`
+ 	consolekit_dbus_chat(xdm_t)
+ ')
+ 
++gen_require(`
++	class dbus all_dbus_perms;
++')
++optional_policy(`
++	dbus_stub(xdm_t)
++',`
++	allow {xdm_t xdm_xserver_t} domain:dbus all_dbus_perms;
++	allow domain {xdm_t xdm_xserver_t}:dbus all_dbus_perms;
++')
++
+ optional_policy(`
+ 	consoletype_exec(xdm_t)
+ ')

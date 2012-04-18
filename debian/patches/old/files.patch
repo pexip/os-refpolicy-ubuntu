@@ -1,0 +1,44 @@
+---
+ policy/modules/kernel/files.if |   22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+Index: refpolicy/policy/modules/kernel/files.if
+===================================================================
+--- refpolicy.orig/policy/modules/kernel/files.if
++++ refpolicy/policy/modules/kernel/files.if
+@@ -4410,6 +4410,7 @@ interface(`files_rw_generic_pids',`
+ 
+ 	list_dirs_pattern($1,var_t,var_run_t)
+ 	rw_files_pattern($1,var_run_t,var_run_t)
++	rw_sock_files_pattern($1,var_run_t,var_run_t)
+ ')
+ 
+ ########################################
+@@ -4450,6 +4451,27 @@ interface(`files_dontaudit_ioctl_all_pid
+ 
+ ########################################
+ ## <summary>
++##	Read generic process ID files.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++## <rolecap/>
++#
++interface(`files_read_generic_pids',`
++	gen_require(`
++		type var_t;
++		type var_run_t;
++	')
++
++	list_dirs_pattern($1,var_t,var_run_t)
++	read_files_pattern($1,var_run_t,var_run_t)
++')
++
++########################################
++## <summary>
+ ##	Read all process ID files.
+ ## </summary>
+ ## <param name="domain">

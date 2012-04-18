@@ -1,0 +1,27 @@
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/cron.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/cron.te	2010-04-22 17:31:47.420788120 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/cron.te	2010-04-22 17:45:08.260627484 -0700
+@@ -217,6 +217,7 @@
+ 
+ miscfiles_read_localization(crond_t)
+ 
++userdom_dbus_chat_all_users(crond_t)
+ userdom_use_unpriv_users_fds(crond_t)
+ # Not sure why this is needed
+ userdom_list_user_home_dirs(crond_t)
+@@ -259,6 +260,14 @@
+ ')
+ 
+ optional_policy(`
++	consolekit_dbus_chat(crond_t)
++')
++
++optional_policy(`
++	dbus_system_bus_client(crond_t)
++')
++
++optional_policy(`
+ 	hal_dbus_chat(crond_t)
+ ')
+ 

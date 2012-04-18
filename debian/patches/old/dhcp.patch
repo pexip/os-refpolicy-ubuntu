@@ -1,0 +1,25 @@
+---
+ policy/modules/services/dhcp.te |    7 +++++++
+ 1 file changed, 7 insertions(+)
+
+Index: refpolicy/policy/modules/services/dhcp.te
+===================================================================
+--- refpolicy.orig/policy/modules/services/dhcp.te
++++ refpolicy/policy/modules/services/dhcp.te
+@@ -110,9 +110,16 @@ optional_policy(`
+ 	bind_read_dnssec_keys(dhcpd_t)
+ ')
+ 
++gen_require(`
++	class dbus all_dbus_perms;
++')
++
+ optional_policy(`
+ 	dbus_system_bus_client_template(dhcpd,dhcpd_t)
+ 	dbus_connect_system_bus(dhcpd_t)
++',`
++	allow dhcpd_t domain:dbus all_dbus_perms;
++	allow domain dhcpd_t:dbus all_dbus_perms;
+ ')
+ 
+ optional_policy(`

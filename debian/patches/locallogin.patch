@@ -1,0 +1,16 @@
+---
+ policy/modules/system/locallogin.te |    1 +
+ 1 file changed, 1 insertion(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/locallogin.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/locallogin.te	2010-04-22 17:31:47.140393678 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/locallogin.te	2010-04-22 17:45:08.320622451 -0700
+@@ -129,6 +129,7 @@
+ 
+ miscfiles_read_localization(local_login_t)
+ 
++userdom_dbus_chat_all_users(local_login_t)
+ userdom_spec_domtrans_all_users(local_login_t)
+ userdom_signal_all_users(local_login_t)
+ userdom_search_user_home_content(local_login_t)

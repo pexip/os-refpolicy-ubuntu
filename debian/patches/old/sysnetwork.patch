@@ -1,0 +1,25 @@
+---
+ policy/modules/system/sysnetwork.te |   10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+Index: refpolicy/policy/modules/system/sysnetwork.te
+===================================================================
+--- refpolicy.orig/policy/modules/system/sysnetwork.te
++++ refpolicy/policy/modules/system/sysnetwork.te
+@@ -152,6 +152,16 @@ optional_policy(`
+ 	consoletype_domtrans(dhcpc_t)
+ ')
+ 
++gen_require(`
++	class dbus all_dbus_perms;
++')
++optional_policy(`
++	dbus_stub(dhcpc_t)
++',`
++	allow dhcpc_t domain:dbus all_dbus_perms;
++	allow domain dhcpc_t:dbus all_dbus_perms;
++')
++
+ optional_policy(`
+ 	init_dbus_chat_script(dhcpc_t)
+ 

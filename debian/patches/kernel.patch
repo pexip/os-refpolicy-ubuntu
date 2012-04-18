@@ -1,0 +1,14 @@
+---
+ policy/modules/kernel/kernel.te |    1 +
+ 1 file changed, 1 insertion(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/kernel/kernel.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/kernel/kernel.te	2010-04-22 17:31:47.180559722 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/kernel/kernel.te	2010-04-22 17:45:08.310583688 -0700
+@@ -386,4 +386,5 @@
+ allow kern_unconfined unlabeled_t:filesystem *;
+ allow kern_unconfined unlabeled_t:association *;
+ allow kern_unconfined unlabeled_t:packet *;
++allow kern_unconfined unlabeled_t:peer *;
+ allow kern_unconfined unlabeled_t:process ~{ transition dyntransition execmem execstack execheap };

@@ -1,0 +1,21 @@
+diff --git a/policy/modules/services/dhcp.te b/policy/modules/services/dhcp.te
+index a4d3f40..0a7e402 100644
+--- a/policy/modules/services/dhcp.te
++++ b/policy/modules/services/dhcp.te
+@@ -111,9 +111,16 @@ optional_policy(`
+ 	bind_read_dnssec_keys(dhcpd_t)
+ ')
+ 
++gen_require(`
++	class dbus all_dbus_perms;
++')
++
+ optional_policy(`
+ 	dbus_system_bus_client(dhcpd_t)
+ 	dbus_connect_system_bus(dhcpd_t)
++',`
++	allow dhcpd_t domain:dbus all_dbus_perms;
++	allow domain dhcpd_t:dbus all_dbus_perms;
+ ')
+ 
+ optional_policy(`

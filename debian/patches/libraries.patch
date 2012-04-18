@@ -1,0 +1,25 @@
+---
+ policy/modules/system/libraries.fc |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/libraries.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/libraries.fc	2010-04-22 17:31:47.040705167 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/libraries.fc	2010-04-22 17:45:08.370491929 -0700
+@@ -160,6 +160,8 @@
+ /usr/lib				-l	gen_context(system_u:object_r:lib_t,s0)
+ ')
+ 
++/usr/lib/libFLAC\.so.*			--	gen_context(system_u:object_r:textrel_shlib_t,s0)
++
+ ifdef(`distro_redhat',`
+ /usr/share/rhn/rhn_applet/eggtrayiconmodule\.so -- gen_context(system_u:object_r:lib_t,s0)
+ 
+@@ -172,7 +174,6 @@
+ HOME_DIR/.*/\.gstreamer-.*/plugins/*\.so.* --	gen_context(system_u:object_r:textrel_shlib_t,s0)
+ 
+ /usr/lib/firefox-[^/]*/plugins/nppdf.so	--	gen_context(system_u:object_r:textrel_shlib_t,s0)
+-/usr/lib/libFLAC\.so.*			--	gen_context(system_u:object_r:textrel_shlib_t,s0)
+ /usr/lib/mozilla/plugins/nppdf\.so 	-- 	gen_context(system_u:object_r:textrel_shlib_t,s0)
+ /usr/lib/maxima/[^/]+/binary-gcl/maxima	--	gen_context(system_u:object_r:textrel_shlib_t,s0)
+ /usr/lib/mozilla/plugins/libvlcplugin\.so --	gen_context(system_u:object_r:textrel_shlib_t,s0)

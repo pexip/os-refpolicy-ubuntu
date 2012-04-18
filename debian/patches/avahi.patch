@@ -1,0 +1,53 @@
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/avahi.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/avahi.fc	2010-04-22 17:31:47.919267963 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/avahi.fc	2010-04-22 17:45:08.120632611 -0700
+@@ -6,4 +6,5 @@
+ 
+ /var/run/avahi-daemon(/.*)? 		gen_context(system_u:object_r:avahi_var_run_t,s0)
+ 
++/usr/lib/avahi/avahi-daemon-check-dns\.sh	--	gen_context(system_u:object_r:avahi_exec_t,s0)
+ /usr/lib/avahi-autoipd(/.*)		gen_context(system_u:object_r:avahi_var_lib_t,s0)
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/avahi.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/avahi.te	2010-04-22 17:31:47.909226609 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/avahi.te	2010-04-22 17:45:08.120632611 -0700
+@@ -37,15 +37,18 @@
+ manage_files_pattern(avahi_t, avahi_var_lib_t, avahi_var_lib_t)
+ files_var_lib_filetrans(avahi_t, avahi_var_lib_t, { dir file })
+ 
++manage_dirs_pattern(avahi_t, avahi_var_run_t, avahi_var_run_t)
+ manage_files_pattern(avahi_t, avahi_var_run_t, avahi_var_run_t)
+ manage_sock_files_pattern(avahi_t, avahi_var_run_t, avahi_var_run_t)
+ allow avahi_t avahi_var_run_t:dir setattr;
+-files_pid_filetrans(avahi_t, avahi_var_run_t, file)
++files_pid_filetrans(avahi_t, avahi_var_run_t, { file dir })
++filetrans_pattern(avahi_t, avahi_var_run_t, avahi_var_run_t, { file socket })
+ 
+ kernel_read_kernel_sysctls(avahi_t)
+ kernel_list_proc(avahi_t)
+ kernel_read_proc_symlinks(avahi_t)
+ kernel_read_network_state(avahi_t)
++kernel_read_system_state(avahi_t)
+ 
+ corenet_all_recvfrom_unlabeled(avahi_t)
+ corenet_all_recvfrom_netlabel(avahi_t)
+@@ -77,6 +80,9 @@
+ 
+ auth_use_nsswitch(avahi_t)
+ 
++corecmd_exec_bin(avahi_t)
++corecmd_exec_shell(avahi_t)
++
+ init_signal_script(avahi_t)
+ init_signull_script(avahi_t)
+ 
+@@ -85,6 +91,8 @@
+ miscfiles_read_localization(avahi_t)
+ miscfiles_read_certs(avahi_t)
+ 
++sysnet_domtrans_ifconfig(avahi_t)
++
+ userdom_dontaudit_use_unpriv_user_fds(avahi_t)
+ userdom_dontaudit_search_user_home_dirs(avahi_t)
+ 

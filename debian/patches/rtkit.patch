@@ -1,0 +1,19 @@
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/rtkit.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/rtkit.fc	2010-04-22 17:31:46.700621632 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/rtkit.fc	2010-04-22 17:45:08.480476504 -0700
+@@ -1 +1,2 @@
+ /usr/libexec/rtkit-daemon	--	gen_context(system_u:object_r:rtkit_daemon_exec_t,s0)
++/usr/lib/rtkit/rtkit-daemon	--	gen_context(system_u:object_r:rtkit_daemon_exec_t,s0)
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/rtkit.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/rtkit.te	2010-04-22 17:31:46.680881369 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/rtkit.te	2010-04-22 17:45:08.480476504 -0700
+@@ -33,3 +33,7 @@
+ optional_policy(`
+ 	policykit_dbus_chat(rtkit_daemon_t)
+ ')
++
++optional_policy(`
++	unconfined_dbus_chat(rtkit_daemon_t)
++')

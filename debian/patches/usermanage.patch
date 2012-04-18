@@ -1,0 +1,93 @@
+useradd must be able to create user home directories
+ubuntu has a symlink: /etc/skel/Examples -> /usr/share/example-content
+---
+ policy/modules/admin/usermanage.fc |    2 ++
+ policy/modules/admin/usermanage.te |   27 +++++++++++++++++++++++++++
+ 2 files changed, 29 insertions(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/admin/usermanage.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/admin/usermanage.fc	2010-04-22 17:31:47.669341112 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/admin/usermanage.fc	2010-04-22 17:45:08.220657750 -0700
+@@ -23,7 +23,9 @@
+ /usr/sbin/pwconv	--	gen_context(system_u:object_r:admin_passwd_exec_t,s0)
+ /usr/sbin/pwunconv	--	gen_context(system_u:object_r:admin_passwd_exec_t,s0)
+ /usr/sbin/useradd	--	gen_context(system_u:object_r:useradd_exec_t,s0)
++/usr/sbin/adduser	--	gen_context(system_u:object_r:useradd_exec_t,s0)
+ /usr/sbin/userdel	--	gen_context(system_u:object_r:useradd_exec_t,s0)
++/usr/sbin/deluser	--	gen_context(system_u:object_r:useradd_exec_t,s0)
+ /usr/sbin/usermod	--	gen_context(system_u:object_r:useradd_exec_t,s0)
+ /usr/sbin/vigr		--	gen_context(system_u:object_r:admin_passwd_exec_t,s0)
+ /usr/sbin/vipw		--	gen_context(system_u:object_r:admin_passwd_exec_t,s0)
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/admin/usermanage.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/admin/usermanage.te	2010-04-22 17:31:47.659299252 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/admin/usermanage.te	2010-04-22 17:45:08.220657750 -0700
+@@ -204,6 +204,8 @@
+ init_read_utmp(groupadd_t)
+ init_dontaudit_write_utmp(groupadd_t)
+ 
++dev_read_urand(groupadd_t)
++
+ domain_use_interactive_fds(groupadd_t)
+ 
+ files_manage_etc_files(groupadd_t)
+@@ -234,6 +236,10 @@
+ userdom_dontaudit_search_user_home_dirs(groupadd_t)
+ 
+ optional_policy(`
++	dbus_dontaudit_use_fds(groupadd_t)
++')
++
++optional_policy(`
+ 	dpkg_use_fds(groupadd_t)
+ 	dpkg_rw_pipes(groupadd_t)
+ ')
+@@ -449,12 +455,17 @@
+ # Execute /usr/bin/{passwd,chfn,chsh} and /usr/sbin/{useradd,vipw}.
+ corecmd_exec_bin(useradd_t)
+ 
++dev_read_urand(useradd_t)
++
+ domain_use_interactive_fds(useradd_t)
+ 
+ files_manage_etc_files(useradd_t)
+ files_search_var_lib(useradd_t)
+ files_relabel_etc_files(useradd_t)
+ files_read_etc_runtime_files(useradd_t)
++# adduser script is written in perl, so needs to read pms
++files_read_usr_symlinks(useradd_t)
++files_read_usr_files(useradd_t)
+ 
+ fs_search_auto_mountpoints(useradd_t)
+ fs_getattr_xattr_fs(useradd_t)
+@@ -498,13 +509,29 @@
+ 
+ userdom_use_unpriv_users_fds(useradd_t)
+ # Add/remove user home directories
++userdom_manage_user_home_dirs(useradd_t)
+ userdom_manage_user_home_content_dirs(useradd_t)
+ userdom_manage_user_home_content_files(useradd_t)
++userdom_manage_user_home_content_symlinks(useradd_t)
+ userdom_home_filetrans_user_home_dir(useradd_t)
+ userdom_user_home_dir_filetrans_user_home_content(useradd_t, notdevfile_class_set)
+ 
+ mta_manage_spool(useradd_t)
+ 
++# adduser script runs other utilities
++can_exec(useradd_t, useradd_exec_t)
++usermanage_domtrans_chfn(useradd_t)
++usermanage_domtrans_groupadd(useradd_t)
++
++optional_policy(`
++	# wants to run crontab when deleting a user
++	cron_role(system_u, useradd_t)
++')
++
++optional_policy(`
++	dbus_dontaudit_use_fds(useradd_t)
++')
++
+ ifdef(`distro_redhat',`
+ 	optional_policy(`
+ 		unconfined_domain(useradd_t)

@@ -1,0 +1,12 @@
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/modemmanager.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/modemmanager.te	2010-04-22 17:31:46.270392772 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/modemmanager.te	2010-04-22 17:45:08.690565542 -0700
+@@ -17,6 +17,7 @@
+ # ModemManager local policy
+ #
+ 
++allow modemmanager_t self:process getsched;
+ allow modemmanager_t self:fifo_file rw_file_perms;
+ allow modemmanager_t self:unix_stream_socket create_stream_socket_perms;
+ allow modemmanager_t self:netlink_kobject_uevent_socket create_socket_perms;

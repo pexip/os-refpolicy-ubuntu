@@ -1,0 +1,2 @@
+/etc/selinux/ubuntu/*
+/usr/share/selinux/ubuntu/*.pp

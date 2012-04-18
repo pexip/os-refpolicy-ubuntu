@@ -1,0 +1,73 @@
+Source: refpolicy-ubuntu
+Section: admin
+Priority: optional
+Maintainer: Ubuntu Hardened Developers <ubuntu-hardened@lists.ubuntu.com>
+XSBC-Original-Maintainer: Caleb Case <ccase@tresys.com>
+Build-Depends: cdbs, debhelper (>= 7), policycoreutils (>= 2.0.35), checkpolicy (>= 2.0.7), python, m4, bzip2, gawk
+Standards-Version: 3.8.4
+Homepage: http://oss.tresys.com/projects/refpolicy
+
+Package: selinux-policy-ubuntu
+Architecture: all
+Pre-Depends: selinux, policycoreutils (>= 2.0.35)
+Depends: python, checkpolicy (>= 2.0.7), gawk, ${misc:Depends}
+Provides: selinux-policy, selinux-policy-default
+Conflicts: selinux-policy-default
+Replaces: selinux-policy-default
+Description: Security-Enhanced Linux Reference Policy
+  The SELinux Reference Policy project (refpolicy) is a complete SELinux policy
+  that can be used as the system policy for a variety of systems and used as the
+  basis for creating other policies. Reference Policy was originally based on
+  the NSA example policy, but aims to accomplish many additional goals:
+    + Strong Modularity
+    + Security Goals
+    + Documentation
+    + Development Tool Support
+    + Forward Looking
+    + Configurability
+    + Flexible Base Policy
+    + Application Policy Variations
+    + Multi-Level Security
+
+Package: selinux-policy-ubuntu-dev
+Architecture: all
+Depends: python, policycoreutils (>= 2.0.35), checkpolicy (>= 2.0.7), gawk, ${misc:Depends}
+Suggests: setools
+Description: Security-Enhanced Linux Reference Policy Development Headers
+  The SELinux Reference Policy project (refpolicy) is a complete SELinux policy
+  that can be used as the system policy for a variety of systems and used as the
+  basis for creating other policies. Reference Policy was originally based on
+  the NSA example policy, but aims to accomplish many additional goals:
+    + Strong Modularity
+    + Security Goals
+    + Documentation
+    + Development Tool Support
+    + Forward Looking
+    + Configurability
+    + Flexible Base Policy
+    + Application Policy Variations
+    + Multi-Level Security
+ .
+ This package provides the header files for building your own SELinux Refpolicy
+ packages.
+
+Package: selinux-policy-ubuntu-doc
+Architecture: all
+Depends: ${misc:Depends}
+Section: doc
+Description: Security-Enhanced Linux Reference Policy Documentation
+  The SELinux Reference Policy project (refpolicy) is a complete SELinux policy
+  that can be used as the system policy for a variety of systems and used as the
+  basis for creating other policies. Reference Policy was originally based on
+  the NSA example policy, but aims to accomplish many additional goals:
+    + Strong Modularity
+    + Security Goals
+    + Documentation
+    + Development Tool Support
+    + Forward Looking
+    + Configurability
+    + Flexible Base Policy
+    + Application Policy Variations
+    + Multi-Level Security
+ .
+ This package contains the documentation for SELinux Reference Policy.

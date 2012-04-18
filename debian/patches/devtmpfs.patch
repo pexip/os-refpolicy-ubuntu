@@ -1,0 +1,16 @@
+Description: allow devtmpfs on /dev.
+Origin: https://launchpad.net/bugs/556823
+Bug-Ubuntu: https://launchpad.net/bugs/556823
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/kernel/filesystem.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/kernel/filesystem.te	2010-04-22 17:31:46.750496634 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/kernel/filesystem.te	2010-04-22 17:45:08.470518146 -0700
+@@ -171,6 +171,7 @@
+ fs_use_trans mqueue gen_context(system_u:object_r:tmpfs_t,s0);
+ fs_use_trans shm gen_context(system_u:object_r:tmpfs_t,s0);
+ fs_use_trans tmpfs gen_context(system_u:object_r:tmpfs_t,s0);
++fs_use_trans devtmpfs gen_context(system_u:object_r:tmpfs_t,s0);
+ 
+ allow tmpfs_t noxattrfs:filesystem associate;
+ 

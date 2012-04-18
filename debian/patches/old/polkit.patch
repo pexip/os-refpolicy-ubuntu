@@ -1,0 +1,543 @@
+---
+ policy/modules/services/polkit.fc |   16 ++
+ policy/modules/services/polkit.if |  267 ++++++++++++++++++++++++++++++++++++++
+ policy/modules/services/polkit.te |  238 +++++++++++++++++++++++++++++++++
+ 3 files changed, 521 insertions(+)
+
+Index: b/policy/modules/services/polkit.fc
+===================================================================
+--- /dev/null
++++ b/policy/modules/services/polkit.fc
+@@ -0,0 +1,17 @@
++
++/usr/libexec/polkit-read-auth-helper	--	gen_context(system_u:object_r:polkit_auth_exec_t,s0)
++/usr/libexec/polkit-grant-helper.*	--	gen_context(system_u:object_r:polkit_grant_exec_t,s0)
++/usr/libexec/polkit-resolve-exe-helper.* --	gen_context(system_u:object_r:polkit_resolve_exec_t,s0)
++/usr/libexec/polkitd			--	gen_context(system_u:object_r:polkit_exec_t,s0)
++
++/usr/lib/policykit-1/polkit-read-auth-helper	--	gen_context(system_u:object_r:polkit_auth_exec_t,s0)
++/usr/lib/policykit-1/polkit-grant-helper.*	--	gen_context(system_u:object_r:polkit_grant_exec_t,s0)
++/usr/lib/policykit-1/polkit-resolve-exe-helper.* --	gen_context(system_u:object_r:polkit_resolve_exec_t,s0)
++/usr/lib/policykit-1/polkit-agent-helper-1	--	gen_context(system_u:object_r:polkit_resolve_exec_t,s0)
++/usr/lib/policykit-1/polkitd			--	gen_context(system_u:object_r:polkit_exec_t,s0)
++
++/var/lib/PolicyKit(/.*)?			gen_context(system_u:object_r:polkit_var_lib_t,s0)
++/var/run/PolicyKit(/.*)?			gen_context(system_u:object_r:polkit_var_run_t,s0)
++/var/lib/PolicyKit-public(/.*)?			gen_context(system_u:object_r:polkit_var_lib_t,s0)
++/var/lib/misc/PolicyKit.reload		--	gen_context(system_u:object_r:polkit_var_lib_t,s0)
++
+Index: b/policy/modules/services/polkit.if
+===================================================================
+--- /dev/null
++++ b/policy/modules/services/polkit.if
+@@ -0,0 +1,267 @@
++
++## <summary>policy for polkit_auth</summary>
++
++########################################
++## <summary>
++##	Execute a domain transition to run polkitd.
++## </summary>
++## <param name="domain">
++## <summary>
++##	Domain allowed to transition.
++## </summary>
++## </param>
++#
++interface(`polkit_domtrans',`
++	gen_require(`
++		type polkit_t;
++                type polkit_exec_t;
++	')
++
++	domtrans_pattern($1, polkit_exec_t, polkit_t)
++')
++
++########################################
++## <summary>
++##	Execute a domain transition to run polkit_auth.
++## </summary>
++## <param name="domain">
++## <summary>
++##	Domain allowed to transition.
++## </summary>
++## </param>
++#
++interface(`polkit_domtrans_auth',`
++	gen_require(`
++		type polkit_auth_t;
++                type polkit_auth_exec_t;
++	')
++
++	domtrans_pattern($1, polkit_auth_exec_t, polkit_auth_t)
++')
++
++########################################
++## <summary>
++##	Read polkit pid files.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++#
++interface(`polkit_read_pid_files',`
++	gen_require(`
++		type polkit_var_run_t;
++	')
++
++	read_files_pattern($1, polkit_var_run_t, polkit_var_run_t)
++')
++
++########################################
++## <summary>
++##	Search polkit lib directories.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++#
++interface(`polkit_search_lib',`
++	gen_require(`
++		type polkit_var_lib_t;
++	')
++
++	allow $1 polkit_var_lib_t:dir search_dir_perms;
++	files_search_var_lib($1)
++')
++
++########################################
++## <summary>
++##	read polkit lib files
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++#
++interface(`polkit_read_lib',`
++	gen_require(`
++		type polkit_var_lib_t;
++	')
++
++	files_search_var_lib($1)
++	read_files_pattern($1, polkit_var_lib_t,  polkit_var_lib_t)
++')
++
++########################################
++## <summary>
++##	Execute a domain transition to run polkit_grant.
++## </summary>
++## <param name="domain">
++## <summary>
++##	Domain allowed to transition.
++## </summary>
++## </param>
++#
++interface(`polkit_domtrans_grant',`
++	gen_require(`
++		type polkit_grant_t;
++                type polkit_grant_exec_t;
++	')
++
++	domtrans_pattern($1, polkit_grant_exec_t, polkit_grant_t)
++')
++
++########################################
++## <summary>
++##	Execute a domain transition to run polkit_resolve.
++## </summary>
++## <param name="domain">
++## <summary>
++##	Domain allowed to transition.
++## </summary>
++## </param>
++#
++interface(`polkit_domtrans_resolve',`
++	gen_require(`
++		type polkit_resolve_t;
++                type polkit_resolve_exec_t;
++	')
++
++	domtrans_pattern($1, polkit_resolve_exec_t, polkit_resolve_t)
++
++	allow polkit_resolve_t $1:dir list_dir_perms;
++	read_files_pattern(polkit_resolve_t, $1, $1)
++	read_lnk_files_pattern(polkit_resolve_t, $1, $1)
++	allow polkit_resolve_t $1:process getattr;
++')
++
++########################################
++## <summary>
++##	Execute a policy_grant in the policy_grant domain, and
++##	allow the specified role the policy_grant domain,
++##	and use the caller's terminal.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++## <param name="role">
++##	<summary>
++##	The role to be allowed the load_policy domain.
++##	</summary>
++## </param>
++## <param name="terminal">
++##	<summary>
++##	The type of the terminal allow the load_policy domain to use.
++##	</summary>
++## </param>
++## <rolecap/>
++#
++interface(`polkit_run_grant',`
++	gen_require(`
++		type polkit_grant_t;
++	')
++
++	polkit_domtrans_grant($1)
++	role $2 types polkit_grant_t;
++	allow polkit_grant_t $3:chr_file rw_term_perms;
++	allow $1 polkit_grant_t:process signal;
++	read_files_pattern(polkit_grant_t, $1, $1)
++	allow polkit_grant_t $1:process getattr;
++')
++
++########################################
++## <summary>
++##	Execute a policy_auth in the policy_auth domain, and
++##	allow the specified role the policy_auth domain,
++##	and use the caller's terminal.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++## <param name="role">
++##	<summary>
++##	The role to be allowed the load_policy domain.
++##	</summary>
++## </param>
++## <param name="terminal">
++##	<summary>
++##	The type of the terminal allow the load_policy domain to use.
++##	</summary>
++## </param>
++#
++interface(`polkit_run_auth',`
++	gen_require(`
++		type polkit_auth_t;
++	')
++
++	polkit_domtrans_auth($1)
++	role $2 types polkit_auth_t;
++	allow polkit_auth_t $3:chr_file rw_term_perms;
++')
++
++#######################################
++## <summary>
++##	The per role template for the nsplugin module.
++## </summary>
++## <desc>
++##	<p>
++##	This template creates a derived domains which are used
++##	for nsplugin web browser.
++##	</p>
++##	<p>
++##	This template is invoked automatically for each user, and
++##	generally does not need to be invoked directly
++##	by policy writers.
++##	</p>
++## </desc>
++## <param name="userdomain_prefix">
++##	<summary>
++##	The prefix of the user domain (e.g., user
++##	is the prefix for user_t).
++##	</summary>
++## </param>
++## <param name="user_domain">
++##	<summary>
++##	The type of the user domain.
++##	</summary>
++## </param>
++## <param name="user_role">
++##	<summary>
++##	The role associated with the user domain.
++##	</summary>
++## </param>
++## <rolecap/>
++#
++template(`polkit_per_role_template',`
++	polkit_run_auth($2, $3, { $1_devpts_t $1_tty_device_t })
++	polkit_run_grant($2, $3, { $1_devpts_t $1_tty_device_t })
++	polkit_read_lib($2)
++')
++
++########################################
++## <summary>
++##	Send and receive messages from
++##	polkit over dbus.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++#
++interface(`polkit_dbus_chat',`
++	gen_require(`
++		type polkit_t;
++		class dbus send_msg;
++	')
++
++	allow $1 polkit_t:dbus send_msg;
++	allow polkit_t $1:dbus send_msg;
++')
+Index: b/policy/modules/services/polkit.te
+===================================================================
+--- /dev/null
++++ b/policy/modules/services/polkit.te
+@@ -0,0 +1,238 @@
++policy_module(polkit_auth, 1.0.0)
++
++########################################
++#
++# Declarations
++#
++
++type polkit_t;
++type polkit_exec_t;
++init_daemon_domain(polkit_t, polkit_exec_t)
++
++type polkit_grant_t;
++type polkit_grant_exec_t;
++init_system_domain(polkit_grant_t, polkit_grant_exec_t)
++
++type polkit_resolve_t;
++type polkit_resolve_exec_t;
++init_system_domain(polkit_resolve_t, polkit_resolve_exec_t)
++
++type polkit_auth_t;
++type polkit_auth_exec_t;
++init_daemon_domain(polkit_auth_t, polkit_auth_exec_t)
++
++type polkit_var_lib_t;
++files_type(polkit_var_lib_t)
++
++type polkit_var_run_t;
++files_pid_file(polkit_var_run_t)
++
++########################################
++#
++# polkit local policy
++#
++
++allow polkit_t self:capability { setgid setuid };
++allow polkit_t self:process getattr;
++
++allow polkit_t self:unix_dgram_socket create_socket_perms;
++allow polkit_t self:fifo_file rw_file_perms;
++allow polkit_t self:unix_stream_socket create_stream_socket_perms;
++
++polkit_domtrans_auth(polkit_t)
++polkit_domtrans_resolve(polkit_t)
++
++can_exec(polkit_t, polkit_exec_t)
++corecmd_exec_bin(polkit_t)
++
++dev_read_urand(polkit_t)
++
++domain_use_interactive_fds(polkit_t)
++
++files_read_etc_files(polkit_t)
++files_read_usr_files(polkit_t)
++
++fs_list_inotifyfs(polkit_t)
++
++kernel_read_kernel_sysctls(polkit_t)
++
++auth_use_nsswitch(polkit_t)
++
++libs_use_ld_so(polkit_t)
++libs_use_shared_libs(polkit_t)
++
++miscfiles_read_localization(polkit_t)
++
++logging_send_syslog_msg(polkit_t)
++
++userdom_dbus_chat_all_users(polkit_t)
++userdom_read_all_users_state(polkit_t)
++
++manage_files_pattern(polkit_t, polkit_var_lib_t, polkit_var_lib_t)
++
++# pid file
++manage_dirs_pattern(polkit_t, polkit_var_run_t, polkit_var_run_t)
++manage_files_pattern(polkit_t, polkit_var_run_t, polkit_var_run_t)
++files_pid_filetrans(polkit_t, polkit_var_run_t, { file dir })
++
++optional_policy(`
++	dbus_system_bus_client(polkit_t)
++	dbus_connect_system_bus(polkit_t)
++	optional_policy(`
++		consolekit_dbus_chat(polkit_t)
++	')
++')
++
++########################################
++#
++# polkit_auth local policy
++#
++
++allow polkit_auth_t self:capability setgid;
++allow polkit_auth_t self:process { getattr };
++
++allow polkit_auth_t self:unix_dgram_socket create_socket_perms;
++allow polkit_auth_t self:fifo_file rw_file_perms;
++allow polkit_auth_t self:unix_stream_socket create_stream_socket_perms;
++
++can_exec(polkit_auth_t, polkit_auth_exec_t)
++corecmd_search_bin(polkit_auth_t)
++
++dev_read_urand(polkit_auth_t)
++
++domain_use_interactive_fds(polkit_auth_t)
++
++files_read_etc_files(polkit_auth_t)
++files_read_usr_files(polkit_auth_t)
++
++auth_use_nsswitch(polkit_auth_t)
++
++libs_use_ld_so(polkit_auth_t)
++libs_use_shared_libs(polkit_auth_t)
++
++miscfiles_read_localization(polkit_auth_t)
++
++logging_send_syslog_msg(polkit_auth_t)
++
++manage_files_pattern(polkit_auth_t, polkit_var_lib_t, polkit_var_lib_t)
++
++# pid file
++manage_dirs_pattern(polkit_auth_t, polkit_var_run_t, polkit_var_run_t)
++manage_files_pattern(polkit_auth_t, polkit_var_run_t, polkit_var_run_t)
++files_pid_filetrans(polkit_auth_t, polkit_var_run_t, { file dir })
++
++userdom_read_all_users_state(polkit_t)
++
++optional_policy(`
++	dbus_system_bus_client(polkit_auth_t)
++	consolekit_dbus_chat(polkit_auth_t)
++')
++
++optional_policy(`
++	hal_getattr(polkit_auth_t)
++	hal_read_state(polkit_auth_t)
++')
++
++optional_policy(`
++	unconfined_run_to(polkit_auth_t, polkit_auth_exec_t)
++')
++
++########################################
++#
++# polkit_grant local policy
++#
++
++allow polkit_grant_t self:capability setuid;
++allow polkit_grant_t self:process getattr;
++
++allow polkit_grant_t self:unix_dgram_socket create_socket_perms;
++allow polkit_grant_t self:fifo_file rw_file_perms;
++allow polkit_grant_t self:unix_stream_socket create_stream_socket_perms;
++
++can_exec(polkit_grant_t, polkit_grant_exec_t)
++corecmd_search_bin(polkit_grant_t)
++
++files_read_etc_files(polkit_grant_t)
++files_read_usr_files(polkit_grant_t)
++
++auth_use_nsswitch(polkit_grant_t)
++auth_domtrans_chk_passwd(polkit_grant_t)
++
++libs_use_ld_so(polkit_grant_t)
++libs_use_shared_libs(polkit_grant_t)
++
++miscfiles_read_localization(polkit_grant_t)
++
++logging_send_syslog_msg(polkit_grant_t)
++
++polkit_domtrans_auth(polkit_grant_t)
++polkit_domtrans_resolve(polkit_grant_t)
++
++manage_files_pattern(polkit_grant_t, polkit_var_run_t, polkit_var_run_t)
++
++manage_files_pattern(polkit_grant_t, polkit_var_lib_t, polkit_var_lib_t)
++userdom_read_all_users_state(polkit_grant_t)
++
++optional_policy(`
++	#dbus_system_bus_client_template(polkit_grant, polkit_grant_t)
++	dbus_system_bus_client(polkit_grant_t)
++	consolekit_dbus_chat(polkit_grant_t)
++')
++
++#gen_require(`
++#	type system_crond_var_lib_t;
++#')
++#
++#manage_files_pattern(polkit_grant_t, system_crond_var_lib_t,  system_crond_var_lib_t)
++
++########################################
++#
++# polkit_resolve local policy
++#
++
++allow polkit_resolve_t self:capability { setuid sys_nice sys_ptrace };
++allow polkit_resolve_t self:process getattr;
++
++allow polkit_resolve_t self:unix_dgram_socket create_socket_perms;
++allow polkit_resolve_t self:fifo_file rw_file_perms;
++allow polkit_resolve_t self:unix_stream_socket create_stream_socket_perms;
++
++read_files_pattern(polkit_resolve_t, polkit_var_lib_t, polkit_var_lib_t)
++
++can_exec(polkit_resolve_t, polkit_resolve_exec_t)
++corecmd_search_bin(polkit_resolve_t)
++
++polkit_domtrans_auth(polkit_resolve_t)
++
++files_read_etc_files(polkit_resolve_t)
++files_read_usr_files(polkit_resolve_t)
++
++auth_use_nsswitch(polkit_resolve_t)
++
++libs_use_ld_so(polkit_resolve_t)
++libs_use_shared_libs(polkit_resolve_t)
++
++miscfiles_read_localization(polkit_resolve_t)
++
++logging_send_syslog_msg(polkit_resolve_t)
++
++userdom_read_all_users_state(polkit_resolve_t)
++userdom_ptrace_all_users(polkit_resolve_t)
++mcs_ptrace_all(polkit_resolve_t)
++
++optional_policy(`
++	#dbus_system_bus_client_template(polkit_resolve, polkit_resolve_t)
++	dbus_system_bus_client(polkit_resolve_t)
++	optional_policy(`
++		consolekit_dbus_chat(polkit_resolve_t)
++	')
++')
++
++optional_policy(`
++	hal_getattr(polkit_resolve_t)
++	hal_read_state(polkit_resolve_t)
++')
++
++#optional_policy(`
++#	unconfined_ptrace(polkit_resolve_t)
++#')

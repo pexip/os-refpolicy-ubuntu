@@ -1,0 +1,87 @@
+---
+ policy/modules/system/sysnetwork.fc |    1 
+ policy/modules/system/sysnetwork.if |   37 ++++++++++++++++++++++++++++++++++++
+ policy/modules/system/sysnetwork.te |    3 ++
+ 3 files changed, 41 insertions(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/sysnetwork.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/sysnetwork.fc	2010-04-22 17:31:48.319216243 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/sysnetwork.fc	2010-04-22 17:45:07.980508427 -0700
+@@ -53,6 +53,7 @@
+ /var/lib/dhclient(/.*)?		gen_context(system_u:object_r:dhcpc_state_t,s0)
+ 
+ /var/run/dhclient.*	--	gen_context(system_u:object_r:dhcpc_var_run_t,s0)
++/var/run/network(/.*)?		gen_context(system_u:object_r:network_var_run_t,s0)
+ 
+ ifdef(`distro_gentoo',`
+ /var/lib/dhcpc(/.*)?		gen_context(system_u:object_r:dhcpc_state_t,s0)
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/sysnetwork.if
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/sysnetwork.if	2010-04-22 17:31:48.309247287 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/sysnetwork.if	2010-04-22 17:45:07.980508427 -0700
+@@ -310,6 +310,25 @@
+ 
+ #######################################
+ ## <summary>
++##	Create, read, write, and delete network state files.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	The type of the process performing this action.
++##	</summary>
++## </param>
++#
++interface(`sysnet_manage_network_state',`
++	gen_require(`
++		type network_var_run_t;
++	')
++
++	manage_files_pattern($1, network_var_run_t, network_var_run_t)
++	manage_dirs_pattern($1, network_var_run_t, network_var_run_t)
++')
++
++#######################################
++## <summary>
+ ##	Create, read, write, and delete network config files.
+ ## </summary>
+ ## <param name="domain">
+@@ -365,6 +384,24 @@
+ 
+ #######################################
+ ## <summary>
++##	Delete the dhcp client state file.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	The type of the process performing this action.
++##	</summary>
++## </param>
++#
++interface(`sysnet_delete_dhcpc_state',`
++	gen_require(`
++		type dhcp_state_t, dhcpc_state_t;
++	')
++
++	delete_files_pattern($1, dhcp_state_t, dhcpc_state_t)
++')
++
++#######################################
++## <summary>
+ ##	Execute ifconfig in the ifconfig domain.
+ ## </summary>
+ ## <param name="domain">
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/sysnetwork.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/sysnetwork.te	2010-04-22 17:31:48.309247287 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/sysnetwork.te	2010-04-22 17:45:07.990477181 -0700
+@@ -37,6 +37,9 @@
+ type net_conf_t alias resolv_conf_t;
+ files_type(net_conf_t)
+ 
++type network_var_run_t;
++files_pid_file(network_var_run_t)
++
+ ########################################
+ #
+ # DHCP client local policy

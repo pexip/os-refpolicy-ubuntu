@@ -1,0 +1,16 @@
+---
+ policy/modules/system/init.te |    1 +
+ 1 file changed, 1 insertion(+)
+
+Index: refpolicy/policy/modules/system/init.te
+===================================================================
+--- refpolicy.orig/policy/modules/system/init.te
++++ refpolicy/policy/modules/system/init.te
+@@ -716,6 +716,7 @@ optional_policy(`
+ 
+ optional_policy(`
+ 	ssh_dontaudit_read_server_keys(initrc_t)
++	ssh_write_sshd(initrc_t)
+ ')
+ 
+ optional_policy(`

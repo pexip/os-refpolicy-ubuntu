@@ -1,0 +1,36 @@
+most of this is carryover from previous policy for ubuntu.  not
+sure if or how much of this stuff is needed.
+---
+ policy/modules/services/cups.te |    7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/cups.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/cups.te	2010-04-22 17:31:48.249236822 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/cups.te	2010-04-22 17:45:08.010418968 -0700
+@@ -139,10 +139,11 @@
+ files_tmp_filetrans(cupsd_t, cupsd_tmp_t, { file dir fifo_file })
+ 
+ allow cupsd_t cupsd_var_run_t:dir setattr;
++manage_dirs_pattern(cupsd_t, cupsd_var_run_t, cupsd_var_run_t)
+ manage_files_pattern(cupsd_t, cupsd_var_run_t, cupsd_var_run_t)
+ manage_sock_files_pattern(cupsd_t, cupsd_var_run_t, cupsd_var_run_t)
+ manage_fifo_files_pattern(cupsd_t, cupsd_var_run_t, cupsd_var_run_t)
+-files_pid_filetrans(cupsd_t, cupsd_var_run_t, { file fifo_file })
++files_pid_filetrans(cupsd_t, cupsd_var_run_t, { file fifo_file dir })
+ 
+ allow cupsd_t hplip_t:process { signal sigkill };
+ 
+@@ -653,10 +654,10 @@
+ miscfiles_read_localization(hplip_t)
+ 
+ sysnet_read_config(hplip_t)
++sysnet_read_dhcpc_pid(cupsd_t)
+ 
+ userdom_dontaudit_use_unpriv_user_fds(hplip_t)
+-userdom_dontaudit_search_user_home_dirs(hplip_t)
+-userdom_dontaudit_search_user_home_content(hplip_t)
++userdom_search_user_home_content(cupsd_t)
+ 
+ lpd_read_config(hplip_t)
+ lpd_manage_spool(hplip_t)

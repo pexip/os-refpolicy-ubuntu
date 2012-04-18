@@ -1,0 +1,28 @@
+---
+ policy/modules/system/unconfined.te |    6 ++++++
+ 1 file changed, 6 insertions(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/unconfined.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/unconfined.te	2010-04-22 17:31:47.090517163 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/unconfined.te	2010-04-22 17:45:08.360434231 -0700
+@@ -14,6 +14,8 @@
+ userdom_manage_tmp_role(unconfined_r, unconfined_t)
+ userdom_manage_tmpfs_role(unconfined_r, unconfined_t)
+ 
++allow unconfined_r system_r;
++
+ type unconfined_exec_t;
+ init_system_domain(unconfined_t, unconfined_exec_t)
+ 
+@@ -81,6 +83,10 @@
+ 
+ 	dbus_stub(unconfined_t)
+ 
++	ifdef(`distro_ubuntu',`
++		dbus_system_bus_client(unconfined_t)
++	')
++
+ 	optional_policy(`
+ 		avahi_dbus_chat(unconfined_t)
+ 	')

@@ -1,0 +1,44 @@
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/kernel/corecommands.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/kernel/corecommands.fc	2010-04-22 17:31:47.370913064 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/kernel/corecommands.fc	2010-04-22 17:45:08.270611606 -0700
+@@ -65,6 +65,11 @@
+ 
+ /etc/netplug\.d(/.*)? 	 		gen_context(system_u:object_r:bin_t,s0)
+ 
++/etc/network/if-up\.d/.*	--	gen_context(system_u:object_r:bin_t,s0)
++/etc/network/if-down\.d/.*	--	gen_context(system_u:object_r:bin_t,s0)
++/etc/network/if-pre-up\.d/.*	--	gen_context(system_u:object_r:bin_t,s0)
++/etc/network/if-port-down\.d/.*	--	gen_context(system_u:object_r:bin_t,s0)
++
+ /etc/ppp/ip-down\..*		--	gen_context(system_u:object_r:bin_t,s0)
+ /etc/ppp/ip-up\..*		--	gen_context(system_u:object_r:bin_t,s0)
+ /etc/ppp/ipv6-up\..*		--	gen_context(system_u:object_r:bin_t,s0)
+@@ -87,6 +92,8 @@
+ /etc/sysconfig/network-scripts/net.* gen_context(system_u:object_r:bin_t,s0)
+ /etc/sysconfig/network-scripts/init.* gen_context(system_u:object_r:bin_t,s0)
+ 
++/etc/wpa_supplicant/.*\.sh	--	gen_context(system_u:object_r:bin_t,s0)
++
+ /etc/X11/xdm/GiveConsole	--	gen_context(system_u:object_r:bin_t,s0)
+ /etc/X11/xdm/TakeConsole	--	gen_context(system_u:object_r:bin_t,s0)
+ /etc/X11/xdm/Xsetup_0		--	gen_context(system_u:object_r:bin_t,s0)
+@@ -156,13 +163,16 @@
+ /usr/(.*/)?sbin(/.*)?			gen_context(system_u:object_r:bin_t,s0)
+ /usr/lib(.*/)?sbin(/.*)?		gen_context(system_u:object_r:bin_t,s0)
+ 
++/usr/lib(64)?/pm-utils/module.d(/.*)?	gen_context(system_u:object_r:bin_t,s0)
++/usr/lib(64)?/pm-utils/power.d(/.*)?	gen_context(system_u:object_r:bin_t,s0)
++/usr/lib(64)?/pm-utils/sleep.d(/.*)?	gen_context(system_u:object_r:bin_t,s0)
++
+ /usr/lib/ccache/bin(/.*)?		gen_context(system_u:object_r:bin_t,s0)
+ /usr/lib/pgsql/test/regress/.*\.sh --	gen_context(system_u:object_r:bin_t,s0)
+ /usr/lib/qt.*/bin(/.*)?			gen_context(system_u:object_r:bin_t,s0)
+ /usr/lib(64)?/[^/]*firefox[^/]*/firefox -- gen_context(system_u:object_r:bin_t,s0)
+ /usr/lib(64)?/apt/methods.+	--	gen_context(system_u:object_r:bin_t,s0)
+-/usr/lib(64)?/ConsoleKit/scripts(/.*)?	gen_context(system_u:object_r:bin_t,s0)
+-/usr/lib(64)?/ConsoleKit/run-session.d(/.*)? gen_context(system_u:object_r:bin_t,s0)
++/usr/lib(64)?/ConsoleKit(/.*)?		gen_context(system_u:object_r:bin_t,s0)
+ /usr/lib(64)?/courier(/.*)?		gen_context(system_u:object_r:bin_t,s0)
+ /usr/lib(64)?/cups(/.*)? 		gen_context(system_u:object_r:bin_t,s0)
+ 

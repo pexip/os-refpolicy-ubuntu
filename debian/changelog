@@ -1,0 +1,682 @@
+refpolicy-ubuntu (0.2.20091117-0ubuntu2) precise; urgency=low
+
+  * fix-ftbfs.patch: Fix build failures from new checkpolicy (LP: #935407)
+
+ -- Tyler Hicks <tyhicks@canonical.com>  Wed, 18 Apr 2012 01:08:52 -0500
+
+refpolicy-ubuntu (0.2.20091117-0ubuntu1) lucid; urgency=low
+
+  * New upstream release, converted to source format 3.
+  * Updated Ubuntu-specific patches thanks to Steve Lawrence (LP: #568744).
+  * Extracted Makefile change to debian/patches/bashisms.patch.
+
+ -- Kees Cook <kees@ubuntu.com>  Thu, 22 Apr 2010 17:10:43 -0700
+
+refpolicy-ubuntu (0.2.20090730-0ubuntu3) lucid; urgency=low
+
+  * devtmpfs.patch: allow /dev to be devtmpfs (LP: #556823).
+
+ -- Kees Cook <kees@ubuntu.com>  Tue, 06 Apr 2010 14:23:17 -0700
+
+refpolicy-ubuntu (0.2.20090730-0ubuntu2) lucid; urgency=low
+
+  * Fixes minor typo in debian/control (LP: #487779)
+
+ -- arky <rakesh_ambati@yahoo.com>  Thu, 11 Feb 2010 15:33:55 +0530
+
+refpolicy-ubuntu (0.2.20090730-0ubuntu1) karmic; urgency=low
+
+  * Updated to upstream release 2.20090730
+  * Handle Upstart direct execution of daemons.
+  * Pre-depend on selinux to ensure that the trigger is handled (LP: #434084).
+
+ -- Caleb Case <ccase@tresys.com>  Mon, 19 Oct 2009 01:48:39 -0400
+
+refpolicy-ubuntu (0.2.20090324-0ubuntu2) jaunty; urgency=low
+
+  * debian/control: Conflict, Replace, and Provides: selinux-policy-default
+    (LP: #360727).
+
+ -- Kees Cook <kees@ubuntu.com>  Mon, 13 Apr 2009 14:41:33 -0700
+
+refpolicy-ubuntu (0.2.20090324-0ubuntu1) jaunty; urgency=low
+
+  * Updated to upstream trunk r2936
+  * Forced symlink creation in /etc/selinux.d/refpolicy
+  * Enabled alsa module
+  * Enabled fstools module
+  * Package renamed to refpolicy-ubuntu to avoid conflict with debian package
+    (LP: #352801).
+
+ -- Marshall Miller <mmiller@tresys.com>  Tue, 24 Mar 2009 02:17:01 -0400
+
+refpolicy (0.2.20081210-0ubuntu1) jaunty; urgency=low
+
+  * Updated to upstream release 2.20081210
+  * Removed the dbus optional elses (dbus policy is always installed now)
+  * Removed the -cups and -unconfined packages as they are not needed to
+    maintain flexibility in which modules are installed. You can still removed
+    them or override via /etc/selinux.d
+  * Changed -dev Recommend: setools to a Suggest
+
+ -- Caleb Case <ccase@tresys.com>  Fri, 13 Mar 2009 02:48:01 -0400
+
+refpolicy (0.0.20071214-0ubuntu3) hardy; urgency=low
+
+  * debian/patches/cups.patch 
+  * debian/patches/files.patch
+  * debian/patches/lpd.patch
+    - Allow cups to use dhcp.
+    - Allow most accesses necessary for cups-pdf.
+    - Allow cups access to dbus when no dbus policy is loaded.
+  * debian/patches/init.patch
+  * debian/patches/ssh.patch
+    - Allow init to change oom priority of sshd.
+  * debian/patches/unconfined.patch 
+  * debian/patches/users.patch
+    - Allowing unconfined_r system_r and access to run_init so that unconfined
+      root user's can start/stop/restart services via init scripts 
+      (LP: #202983, #209773, #211305, #216132)
+
+ -- Caleb Case <ccase@tresys.com>  Tue, 25 Mar 2008 16:42:08 -0400
+
+refpolicy (0.0.20071214-0ubuntu2) hardy; urgency=low
+
+  * debian/patches/conf.patch
+    - Adding root to config/appconfig-standard/seusers so that its home
+      directory will get labeled correctly.
+
+ -- Caleb Case <ccase@tresys.com>  Fri, 29 Feb 2008 12:31:15 -0500
+
+refpolicy (0.0.20071214-0ubuntu1) hardy; urgency=low
+
+  [ Caleb Case ]
+  * New upstream SVN HEAD.
+   - Labeled networking peer object class updates.
+   - Patch for debian logrotate to handle syslogd-listfiles, from Vaclav Ovsik.
+   - Improve several tunables descriptions from Dan Walsh.
+   - Patch to clean up ns switch usage in the policy from Dan Walsh.
+   - More complete labeled networking infrastructure from KaiGai Kohei.
+   - Add interface for libselinux constructor, for libselinux-linked
+     SELinux-enabled programs.
+   - Patch to restructure user role templates to create restricted user roles
+     from Dan Walsh.
+   - Russian man page translations from Andrey Markelov.
+   - Remove unused types from dbus.
+   - Add infrastructure for managing all user web content.
+   - Deprecate some old file and dir permission set macros in favor of the
+     newer, more consistently-named macros.
+   - Patch to clean up unescaped periods in several file context entries from
+     Jan-Frode Myklebust.
+   - Merge shlib_t into lib_t.
+   - Merge strict and targeted policies.  The policy will now behave like the
+     strict policy if the unconfined module is not present.  If it is, it will
+     behave like the targeted policy.  Added an unconfined role to have a mix
+     of confined and unconfined users.
+   - Added modules:
+   	exim (Dan Walsh)
+   	postfixpolicyd (Jan-Frode Myklebust)
+   - Add support for setting the unknown permissions handling.
+   - Fix XML building for external reference builds and headers builds.
+   - Patch to add missing requirements in userdomain interfaces from Shintaro
+     Fujiwara.
+   - Add tcpd_wrapped_domain() for services that use tcp wrappers.
+   - Update MLS constraints from LSPP evaluated policy.
+   - Allow initrc_t file descriptors to be inherited regardless of MLS level.
+     Accordingly drop MLS permissions from daemons that inherit from any level.
+   - Files and radvd updates from Stefan Schulze Frielinghaus.
+   - Deprecate mls_file_write_down() and mls_file_read_up(), replaced with
+     mls_write_all_levels() and mls_read_all_levels(), for consistency.
+   - Add make kernel and init ranged interfaces pass the range transition MLS
+     constraints.  Also remove calls to mls_rangetrans_target() in modules that 
+     use the kernel and init interfaces, since its redundant.
+   - Add interfaces for all MLS attributes except X object classes.
+   - Require all sensitivities and categories for MLS and MCS policies, not just
+     the low and high sensitivity and category.
+   - Database userspace object manager classes from KaiGai Kohei.
+   - Add third-party interface for Apache CGI.
+   - Add getserv and shmemserv nscd permissions.
+   - Add debian apcupsd binary location, from Stefan Schulze Frielinghaus.
+   - Added modules:
+   	application
+   	awstats (Stefan Schulze Frielinghaus)
+   	bitlbee (Devin Carraway)
+   	brctl (Dan Walsh)
+   - Fix incorrectly named files_lib_filetrans_shared_lib() interface in the
+     libraries module.
+   - Unified labeled networking policy from Paul Moore.
+   - Use netmsg initial SID for MLS-only Netlabel packets, from Paul Moore.
+   - Xen updates from Dan Walsh.
+   - Filesystem updates from Dan Walsh.
+   - Large samba update from Dan Walsh.
+   - Drop snmpd_etc_t.
+   - Confine sendmail and logrotate on targeted.
+   - Tunable connection to postgresql for users from KaiGai Kohei.
+   - Memprotect support patch from Stephen Smalley.
+   - Add logging_send_audit_msgs() interface and deprecate
+     send_audit_msgs_pattern().
+   - Openct updates patch from Dan Walsh.
+   - Merge restorecon into setfiles.
+   - Patch to begin separating out hald helper programs from Dan Walsh.
+   - Fixes for squid, dovecot, and snmp from Dan Walsh.
+   - Miscellaneous consolekit fixes from Dan Walsh.
+   - Patch to have avahi use the nsswitch interface rather than individual
+     permissions from Dan Walsh.
+   - Patch to dontaudit logrotate searching avahi pid directory from Dan Walsh.
+   - Patch to allow insmod to mount kvmfs and dontaudit rw unconfined_t pipes
+     to handle usage from userhelper from Dan Walsh.
+   - Patch to allow amavis to read spamassassin libraries from Dan Walsh.
+   - Patch to allow slocate to getattr other filesystems and directories on those
+     filesystems from Dan Walsh.
+   - Fixes for RHEL4 from the CLIP project.
+   - Replace the old lrrd fc entries with munin ones.
+   - Move program admin template usage out of userdom_admin_user_template() to
+     sysadm policy in userdomain.te to fix usage of the template for third
+     parties.
+   - Fix clockspeed_run_cli() declaration, it was incorrectly defined as a
+     template instead of an interface.
+   - Added modules:
+   	amtu (Dan Walsh)
+   	apcupsd (Dan Walsh)
+   	rpcbind (Dan Walsh)
+   	rwho (Nalin Dahyabhai)
+  * debian/control
+    * selinux-policy-refpolicy depends on *-cups an *-unconfined policies.
+    * selinux-policy-refpolicy-(cups|unconfined) provide
+      selinux-policy-(cups|unconfined) (potentially allowing a user to install
+      a dummy package to satisfy).
+  * debian/patches/conf.patch
+    * added seusers patch that makes all users unconfined by default.
+  * debian/selinux-policy-refpolicy.*
+    * adding in dbus policy
+
+  [ Joseph Jackson IV ]
+  * debian/control
+    - Update Debian Maintainer field
+
+  [ J. Tang ]
+  * debian/postinst
+    - Invoke /usr/sbin/update-selinux-policy to change the policy
+    to refpolicy, if possible.
+  * debian/selinux-policy-refpolicy.*postrrm
+    - Handle purging correctly.
+
+ -- Caleb Case <ccase@tresys.com>  Fri, 08 Feb 2008 03:22:20 -0500
+
+refpolicy (0.0.20070507-5) unstable; urgency=low
+
+  * Allow users to read the dpkg database. With this change, every user
+    of the strict policy now has access to dpkg-checkbuildeps, grep-dctrl,
+    etc, which was not the case previously.
+  * Change the example localStrict.te policy file to silently ignore apt
+    searching for something in /var/lib. With this example policy loaded
+    in my strict policy UML virtual machine, I can compile packages in
+    enforcing mode. Based on advice on the mailing list, allow more things
+    to access /selinux
+  * Merge in changes from Russell Coker. These include a better fix for
+    /lib.init/rw.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Fri, 18 May 2007 00:34:07 -0500
+
+refpolicy (0.0.20070507-4) unstable; urgency=low
+
+  * Allow apt to run update by giving r_netlink_socket_perms to
+    self:netlink_route_socket.
+  * Allow apt/aptitude to update, and install files
+    - Added an interface to apt.if allow silently ignoring processes that
+      attempt to use file descriptors from apt. 
+    - Bump the apt policy module version number, since we have added to
+      the interface. 
+    - Added some stuff to dpkg.te to allow debconf .config file
+      interactions back to the user 
+    - Add an optional  dontaudit rule to libraries.te to allow
+      apt-get/aptitude to install packages silently. 
+  * Very early in boot, /lib/init/rw is created as a mandatory tmpfs for
+    state information. Label that directory as initrc_tmp_t to allow
+    mount.te to be permitted to mount a tmpfs there.
+  * In init.te, allow /etc/network/if-up.d/mountnfs to create
+    /var/run/network/mountnfs as a poor mans lock. 
+
+ -- Manoj Srivastava <srivasta@debian.org>  Fri, 11 May 2007 00:55:07 -0500
+
+refpolicy (0.0.20070507-3) unstable; urgency=low
+
+  * Add hostfs as a recognized remote file-system. This should allow a
+    UML virtual machine to function in a fully enforcing mode.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Wed,  9 May 2007 15:48:26 -0500
+
+refpolicy (0.0.20070507-2) unstable; urgency=medium
+
+  * Keep track of modules that are really  built into the base policy in
+    Debian.  We then use this list to remove  the modules .pp files from
+    the policy shipped, since they can not be installed along with the
+    base policy anyway. Make sure we don't add such modules hen
+    considering module dependencies either.
+  * Added Module ricci to modules.conf for both strict and targeted.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Mon,  7 May 2007 09:07:36 -0500
+
+refpolicy (0.0.20070507-1) unstable; urgency=low
+
+  * New upstream SVN HEAD.
+    - Miscellaneous consolekit fixes from Dan Walsh.
+    - Patch to have avahi use the nsswitch interface rather than individual
+      permissions from Dan Walsh.
+    - Patch to dontaudit logrotate searching avahi pid directory from Dan
+      Walsh. 
+    - Patch to allow insmod to mount kvmfs and dontaudit rw unconfined_t
+      pipes to handle usage from userhelper from Dan Walsh.
+    - Patch to allow amavis to read spamassassin libraries from Dan Walsh.
+    - Patch to allow slocate to getattr other filesystems and directories
+      on those filesystems from Dan Walsh.
+    - Fixes for RHEL4 from the CLIP project.
+    - Replace the old lrrd fc entries with munin ones.
+    - Move program admin template usage out of
+      userdom_admin_user_template() to sysadm policy in userdomain.te to
+      fix usage of the template for third parties.
+    - Fix clockspeed_run_cli() declaration, it was incorrectly defined as a
+      template instead of an interface.
+    - Added modules: rwho (Nalin Dahyabhai)
+  * Updated dependencies, since this refpolicy needs newer toolchain,
+
+ -- Manoj Srivastava <srivasta@debian.org>  Mon,  7 May 2007 01:47:44 -0500
+
+refpolicy (0.0.20070417-1) unstable; urgency=low
+
+  * New upstream release.
+  * Added XS-VCS-Arch and XS-VCS-Browse to debian/control, and updated
+    build dependencies.
+  * Bug fix: "selinux-policy-refpolicy-targeted: need file_contexts for
+    gcj-dbtool-4.1 and /var/log/account", thanks to Russell Coker
+                                                           (Closes: #416910).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Thu, 19 Apr 2007 02:28:29 -0500
+
+refpolicy (0.0.20061018-5) unstable; urgency=high
+
+  * Add policy for log and lock files for aptitude. This is needed for
+    proper function; so one does not need to go into permissive mode to
+    run aptitude.  Stolen from Erich. This is a low risk change.
+  * Debian puts grub in /usr/sbin/grub. Reflect that in the initial file
+    context. 
+  * Debian creates /dev/xconsole independently of whether or not a xserver
+    has been installed or not. So move the policy related to /dev/sconsole
+    out of the xserver policy, and into places where relevant (init.te,
+    logging.fc), to reflect the status that /dev/console is present
+    anyway.
+  * Add support for /etc/network/run  and /dev/shm/network, which seem to
+    be Debian specific as well.
+  * Allow udev to manage configuration files.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Fri,  9 Mar 2007 00:22:19 -0600
+
+refpolicy (0.0.20061018-4) unstable; urgency=low
+
+  * Bug fix: "selinux-policy-refpolicy-targeted: does not suggest a way to
+    fix the 'maybe failing' attempt in postinst", thanks to Eddy Petrisor.
+    While this does not belong in the postinst, I have addedthis to the 
+    README.Debian file. This should be a low risk change. (Closes: #407691).
+  * Bug fix: "Default build.conf doesn't match default strict/targeted
+    policy", thanks to Stefan.The build.conf included in the reference
+    source policy describe to build a policy of the type "strict". The
+    default binary policies coming with Debian are build with the policy
+    type "strict-mcs" or "targeted-mcs". Change the build.conf shipped in
+    source to conform to what we really use. (changes TYPE=strict to 
+    TYPE=strict-mcs, very low risk change.                (Closes: #411256).
+  * Bug fix: "selinux-policy-refpolicy-targeted: openvpn policy do not
+    allow tcp connection mode", thanks to Rafal Kupka. This bug really
+    should be at least important, and we should fully support a class of
+    security product like OpenVPN on machines which are running SELinux,
+    and this is a very low risk change.                    (Closes: #409041).
+  * Install header files required for policy building for both strict and
+    targeted policies in a new -dev package, so it becomes really useful
+    to work with the source package. Moved the examples from the -src
+    package to this new -dev package, since the example is only useful in
+    with the headers provided. This is a new package, but it contains only
+    files already in the sources (No upstream changes at all), and is the
+    result of make install-headers. This new package has no rdepends, and
+    should be a very low risk addition to Debian.
+  * This release should be a whole lot better for building local policies,
+    including the policygentool for creating a new policy from scratch,
+    and ability to build local policy modular packages. The build.conf
+    files have been cleaned up, and the source policy defaults to targeted
+    policy, which is standard in Debian, as opposed to the strict policy,
+    which has priority optional.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Mon, 26 Feb 2007 22:37:17 -0600
+
+refpolicy (0.0.20061018-3) unstable; urgency=high
+
+  * Bug fix: "refpolicy: FTBFS: /bin/sh: debian/stamp/config-strict: No
+    such file or directory", thanks to Lucas Nussbaum. This was fixed by
+    moving all the stamps into ./debian instead. I'll re-visit the
+    ./debian/stamp/ directory in lenny. This is a pretty minor packaging
+    change.                                                 (Closes: #405613).
+  * Bug fix: "selinux-policy-refpolicy-targeted: Policy for dcc misses
+    Debian's FHS paths", thanks to Devin Carraway. From the bug report:
+    Many of the files in these packages are overlooked when labelling
+    files, because refpolicy's dcc module stipulates paths not consistent
+    with the Debian FHS layout.  The files go unlabelled and dcc-client
+    (at least) stops working. The two major problems  are the references
+    to /usr/libexec/dcc (damons, placed in /usr/sbin by the Debian
+    packages) and to /var/dcc (all sorts of things, placed under
+    /var/lib/dcc).  A side effect of the latter is that dccifd_t and
+    probably others need search on var_lib_t, through which it must pass
+    to get to /var/lib/dcc.  Fixed the policy; will send upstream.
+                                                             (Closes: #404309).
+  * Bug fix: "selinux-policy-refpolicy-targeted: clamav policy forbids
+    clamd_t search on /var/lib", thanks to Devin Carraway.  This is a
+    simple one line change, and obviously an oversight; I think getting
+    clamd to work is fairly important.                        (Closes: #404895).
+  * Bug fix: "selinux-policy-refpolicy-targeted: Multiple problems with
+    courier policy", thanks to Devin Carraway.  There is detailed
+    information of the changes made in the bug report, and in the commit
+    logs. Again, fixing courier daemons seems pretty important; SELinux
+    tends to get used a lot on remote mail servers, and this fixes issues
+    with the policy.                                          (Closes: #405103).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Mon, 15 Jan 2007 13:20:30 -0600
+
+refpolicy (0.0.20061018-2) unstable; urgency=high
+
+  * The This update enables MCS for targeted and strict, uses 1024
+    categories (as Fedora uses - necessary for compatability). Please note
+    that enabling MCS categories is required for compatibility with
+    filesystems created on Fedora Core 5 and above, RHEL 5 and above, and
+    CentOS 5 and above.  MCS categories is also a feature that we plan for
+    all future releases of SE Linux and does not have a nice upgrade path
+    - releasing etch without MCS will make things painful for SE Linux
+    users on the upgrade to lenny. This feature has been extensively
+    tested by Russel Coker and myself, and does not otherwise impact the
+    install. 
+  * Allow semanage to use the initrd file descriptor in targeted policy.
+  * Fix a bug with restorecon.
+  * Bug fix: "refpolicy: qemu should have execmem permissions", thanks to
+    David Härdeman                                       (Closes: #402293).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Fri, 22 Dec 2006 10:33:22 -0600
+
+refpolicy (0.0.20061018-1) unstable; urgency=low
+
+  * New upstream release
+  * Updated copyright file with the new location of the sources, and added
+    a watch file.
+  * Bug fix: "selinux-policy-refpolicy-targeted: postinst package list
+    retrieval suggestion", thanks to Alexander Buerger. Thanks to the
+    provided suggestion, the selection of policy modules to install is not
+    only faster, it is actually correct :)                 (Closes: #388744).
+  * Bug fix: "Makefile for building policy modules?", thanks to Uwe
+    Hermann.  Provided an intial version, may have bugs.   (Closes: #389116).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Tue, 24 Oct 2006 14:31:22 -0500
+
+refpolicy (0.0.20060911-2) unstable; urgency=low
+
+  * Fixed a typo in policy postinst that made all the policies reload at
+    every update.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Tue, 12 Sep 2006 10:28:11 -0500
+
+refpolicy (0.0.20060911-1) unstable; urgency=low
+
+  * New upstream SCM HEAD.
+  * Synched with Erich Schubert <erich@debian.org>
+    + Added first draft of python-support. You'll want to relabel these files.
+    + Build python-support and setroubleshoot modules
+    + Removed modules from guessing hintfile that are included in base.
+
+  * Bug fix: "Defaults should match the strict/targeted policy", thanks to
+    Uwe Hermann. Makde them match strict.                     (Closes: #386931).
+  * Bug fix: "selinux-policy-refpolicy-src: Duplicate entries in policy
+    files", thanks to Simon Richard Grint                     (Closes: #386909).
+  * Bug fix: "modules.conf vs. modules.conf.dist", thanks to Uwe Hermann
+                                                              (Closes: #386887).
+  * Bug fix: "OUTPUT_POLICY and policy-version comments", thanks to Uwe
+    Hermann                                                  (Closes: #386930).
+  * Bug fix: "s/bzip2/gzip/?", thanks to Uwe Hermann         (Closes: #386885).
+  * Bug fix: "selinux-refpolicy-src: include modules.conf files of strict
+    and targeted for -src package", thanks to Erich Schubert
+                                                              (Closes: #386573).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Mon, 11 Sep 2006 17:46:10 -0500
+
+refpolicy (0.0.20060907-3) unstable; urgency=low
+
+  * Updated a few more policy modules to latest versions for Debian.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Fri,  8 Sep 2006 12:42:22 -0500
+
+refpolicy (0.0.20060907-2) unstable; urgency=low
+
+  * Update the module/package mapping.
+  * In the selinux-policy-refpolicy-src package, now ship the
+    modules.conf.strict and the modules.conf.targeted files which are used
+    to build the corresponding policy packages, snce the raw modules.conf
+    package has issues on Debian.
+  * With this version, we no longer ship the selinux-policy-refpolicy-src
+    unpacked into /etc with a gazillion conffiles; instead, we now ship a
+    compressed tarball in /usr/src, which the user may unpack where they
+    wish, and install policies as they wish.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Fri,  8 Sep 2006 10:49:40 -0500
+
+refpolicy (0.0.20060907-1) unstable; urgency=low
+
+  * New upstream SCM HEAD.
+  * Bug fix: "selinux-policy-refpolicy-src: Compile failure of modular
+    targeted policy", thanks to Simon Richard Grint. Put a wrapper around
+    the offending lines to only take effect when running a strict policy.
+                                                            (Closes: #384502).
+  * Bug fix: "make: /usr/sbin/setfiles: Command not found", thanks to Uwe
+    Hermann. Fixed upstream.                                (Closes: #384850).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Fri,  8 Sep 2006 00:27:39 -0500
+
+refpolicy (0.0.20060813-2) unstable; urgency=low
+
+  * Bug fix: "Needs gawk", thanks to Simon Richard Grint
+                                                         (Closes: #382821).
+  * Bug fix: "Move /etc/selinux/refpolicy/src/policy/man/man8/*
+    manpages?", thanks to Uwe Hermann                    (Closes: #372789).
+  * Fix errors in post installation initial policy creation process in the
+    postinst. 
+  * Add directories required during policy build during postinst. This bug
+    prevented any policies being built when the package was initially
+    installed. Also, create an empty  file_contexts.local file if it does
+    not already exist. 
+  * Make selinux-policy-refpolicy-targeted provide and replace the
+    obsolete package selinux-policy-default; which should in the future be
+    just a virtual package. 
+  * Added postrm packages to strict and targeted policy packages, in order
+    to clean out the directories in which files are created during policy
+    build. 
+  * Rewrote the postinst in perl to allow us to do module dependency
+    checks, and to map policy modules to debian packages, in order to
+    better detect the modules that would be necessary for the target
+    machine. 
+  * Also, compiling with either MCS or MLS produced errors while
+    installing policy, since we lack setrans daemon. So we are now
+    building with out them, created an easy to modify option to re-enable
+    it later.
+  * Updated modules.conf to use the latest offerings from Erich.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Mon, 21 Aug 2006 14:59:52 -0500
+
+refpolicy (0.0.20060813-1) unstable; urgency=low
+
+  * New upstream SCM HEAD.
+  * Bug fix: "refpolicy: FTBFS: tmp/generated_definitions.conf:597:ERROR
+    'syntax error' at token '' on line 3416:", thanks to Andreas Jochens
+                                                        (Closes: #379559).
+  * Bug fix: "FTBFS while generating selinux-policy-refpolicy-strict",
+    thanks to Devin Carraway                            (Closes: #379376).
+  * Python transition (#2): you are building a private python module.
+                                                        (Closes: #380930).
+
+ -- Manoj Srivastava <srivasta@debian.org>  Tue, 15 Aug 2006 09:53:06 -0500
+
+refpolicy (0.0.20060509-2) unstable; urgency=low
+
+  * Modified some paths to be more in line with upstream standards.
+
+ -- Manoj Srivastava <srivasta@debian.org>  Fri, 12 May 2006 08:30:08 -0500
+
+refpolicy (0.0.20060509-1) unstable; urgency=low
+
+  * New upstream release. First packaging for Sid. 
+
+ -- Manoj Srivastava <srivasta@debian.org>  Tue,  9 May 2006 13:56:10 -0500
+
+refpolicy (20060506-1) sesarge; urgency=low
+
+  * New upstream checkout from CVS.
+  * Even more new modules.
+
+ -- Erich Schubert <erich@debian.org>  Sat,  6 May 2006 21:44:07 +0200
+
+refpolicy (20060418-2) sesarge; urgency=low
+
+  * New upstream checkout from CVS.
+
+ -- Erich Schubert <erich@debian.org>  Fri, 21 Apr 2006 19:17:05 +0200
+
+refpolicy (20060417-1) sesarge; urgency=low
+
+  * New upstream checkout from CVS.
+  * Until module linking is fixed, build everything into base.
+    (Sorry, this will result in a much larger policy than necessary.
+     Feel free to use the -src package to build your own!)
+
+ -- Erich Schubert <erich@debian.org>  Mon, 17 Apr 2006 21:04:49 +0200
+
+refpolicy (20060414-1) sesarge; urgency=low
+
+  * New upstream version with tons of new policy files
+
+ -- Erich Schubert <erich@debian.org>  Mon, 17 Apr 2006 20:48:50 +0200
+
+refpolicy (20060329-2) sesarge; urgency=low
+
+  * Merge upstream 20060329-2
+
+ -- Erich Schubert <erich@debian.org>  Mon,  3 Apr 2006 00:44:06 +0200
+
+refpolicy (20060324-2) sesarge; urgency=low
+
+  * Merge upstream 20060324-4
+
+ -- Erich Schubert <erich@debian.org>  Sat, 25 Mar 2006 03:34:36 +0100
+
+refpolicy (20060324-1) sesarge; urgency=low
+
+  * Merge upstream 20060323-2
+  * Merge changes by Thomas Bleher
+  * Build with checkpolicy 1.30.1
+  * Sorry, still doesn't work with make > 3.80
+
+ -- Erich Schubert <erich@debian.org>  Sat, 25 Mar 2006 02:21:00 +0100
+
+refpolicy (20060315-2) sesarge; urgency=low
+
+  * Make modular policy actually work. Hopefully.
+    (Up to now, optional_policy(`module') in base was not working upstream!)
+  * Revamp build process, don't use CDBS anymore since I didn't figure out
+    how to do two clean runs of the same source tree, and there is little
+    benefit here without any autotools or library magic needed
+
+ -- Erich Schubert <erich@debian.org>  Fri, 17 Mar 2006 20:51:55 +0100
+
+refpolicy (20060315-1.1) sesarge; urgency=low
+
+  * Small tweaks and bugfixes to policy
+
+ -- Erich Schubert <erich@debian.org>  Thu, 16 Mar 2006 23:13:40 +0100
+
+refpolicy (20060315-1) sesarge; urgency=low
+
+  * Merge with upstream and debian changes as of 20060309, rev 50
+  * Merge with upstream and debian changes as of 20060315, rev 55
+  * Added "netuser" role, similar to user_tcp_server boolean, but
+    you can enable it for single users only.
+
+ -- Erich Schubert <erich@debian.org>  Thu, 16 Mar 2006 00:23:54 +0100
+
+refpolicy (20060306-1) sesarge; urgency=low
+
+  * Merge with upstream and debian policy changes as of 20060306, Rev 31
+  * Try to auto-build a policy after a fresh install in postinst
+  * Add inetd module to base for now
+  * Increase policycoreutils build-dep to hopefully solve the users_extra
+    issues by using a newer policycoreutils for building...
+
+ -- Erich Schubert <erich@debian.org>  Mon,  6 Mar 2006 17:10:43 +0100
+
+refpolicy (20060227-1) sesarge; urgency=low
+
+  * Merge with upstream and debian policy changes as of 20060227, Rev 20
+
+ -- Erich Schubert <erich@debian.org>  Tue, 28 Feb 2006 03:48:48 +0100
+
+refpolicy (20060224-2) sesarge; urgency=low
+
+  * Update build process to not require a tarball, include previous
+    patches into our "branch" of the reference policy instead.
+
+ -- Erich Schubert <erich@debian.org>  Tue, 28 Feb 2006 03:13:51 +0100
+
+refpolicy (20060224-1) sesarge; urgency=low
+
+  * New upstream CVS checkout.
+  * Move policy src from /etc to /usr/share/selinux/refpolicy
+    This avoids an apt-get size limitation and follows Fedora.
+  * Ship edited build.conf with policy source.
+  * Use debhelper for installing documentation.
+  * Add dependency for source onto gawk.
+
+ -- Erich Schubert <erich@debian.org>  Sat, 25 Feb 2006 01:01:44 +0100
+
+refpolicy (20060222-1) sesarge; urgency=low
+
+  * New upstream CVS checkout.
+  * Thomas also provided a workaround for the make issues in his version.
+  * Update dpkg/apt policy to interface renamings
+  * Remove dpkg_script_exec_t, as supporting this would require bad hacks
+    to dpkg and/or tar. Use dpkg_var_lib_t instead.
+
+ -- Erich Schubert <erich@debian.org>  Thu, 23 Feb 2006 02:01:35 +0100
+
+refpolicy (20060217-3) sesarge; urgency=low
+
+  * Create selinux-policy-refpolicy-doc package
+  * DIRECT_INITRC=y
+
+ -- Thomas Bleher <ThomasBleher@gmx.de>  Mon, 20 Feb 2006 23:43:53 +0000
+
+refpolicy (20060217-2) sesarge; urgency=low
+
+  * Added first drafts of dpkg, apt policy
+
+ -- Erich Schubert <erich@debian.org>  Sat, 18 Feb 2006 03:20:59 +0100
+
+refpolicy (20060217-1) sesarge; urgency=low
+
+  * New upstream CVS checkout
+  * Document make incompaibility via build-dep
+  * Don't build some redhat specific policy modules, minor tweaks
+
+ -- Erich Schubert <erich@debian.org>  Tue, 14 Feb 2006 02:35:04 +0100
+
+refpolicy (20060213-1) sesarge; urgency=low
+
+  * New upstream CVS checkout.
+  * Still not really useable
+
+ -- Erich Schubert <erich@debian.org>  Tue, 14 Feb 2006 02:35:04 +0100
+
+refpolicy (20060117-1) sesarge; urgency=low
+
+  * Experimental release
+
+ -- Erich Schubert <erich@debian.org>  Mon, 13 Feb 2006 22:50:03 +0100
+

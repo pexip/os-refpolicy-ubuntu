@@ -1,0 +1,19 @@
+a bug in the kernel requires open perm on dir search.
+should be fixed in 2.6.29
+---
+ policy/support/obj_perm_sets.spt |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: b/policy/support/obj_perm_sets.spt
+===================================================================
+--- a/policy/support/obj_perm_sets.spt
++++ b/policy/support/obj_perm_sets.spt
+@@ -181,7 +181,7 @@ define(`create_shm_perms', `{ associate 
+ #
+ define(`getattr_dir_perms',`{ getattr }')
+ define(`setattr_dir_perms',`{ setattr }')
+-define(`search_dir_perms',`{ getattr search }')
++define(`search_dir_perms',`{ getattr open search }')
+ define(`list_dir_perms',`{ getattr search open read lock ioctl }')
+ define(`add_entry_dir_perms',`{ getattr search open lock ioctl write add_name }')
+ define(`del_entry_dir_perms',`{ getattr search open lock ioctl write remove_name }')

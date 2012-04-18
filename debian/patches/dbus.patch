@@ -1,0 +1,259 @@
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/dbus.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/dbus.fc	2010-04-22 17:31:48.049196792 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/dbus.fc	2010-04-22 17:45:08.060496902 -0700
+@@ -15,3 +15,10 @@
+ ifdef(`distro_redhat',`
+ /var/named/chroot/var/run/dbus(/.*)?	gen_context(system_u:object_r:system_dbusd_var_run_t,s0)
+ ')
++
++/usr/bin/system-tools-backends	--	gen_context(system_u:object_r:stb_exec_t,s0)
++/usr/share/system-tools-backends-2\.0/scripts/SystemToolsBackends\.pl	--	gen_context(system_u:object_r:stb_exec_t,s0)
++
++/var/cache/system-tools-backends(/.*)?		gen_context(system_u:object_r:stb_var_cache_t,s0)
++
++/lib/dbus-1.0/dbus-daemon-launch-helper	--	gen_context(system_u:object_r:dbusd_exec_t,s0)
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/dbus.if
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/dbus.if	2010-04-22 17:31:48.069143854 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/dbus.if	2010-04-22 17:45:08.060496902 -0700
+@@ -182,6 +182,7 @@
+ 
+ 	# SE-DBus specific permissions
+ 	allow $1 { system_dbusd_t self }:dbus send_msg;
++	allow system_dbusd_t $1:dbus send_msg;
+ 
+ 	read_files_pattern($1, system_dbusd_var_lib_t, system_dbusd_var_lib_t)
+ 	files_search_var_lib($1)
+@@ -405,3 +406,22 @@
+ 
+ 	typeattribute $1 dbusd_unconfined;
+ ')
++
++########################################
++## <summary>
++##	Do not audit attempts to inherit file
++##	descriptors from system dbus.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++#
++interface(`dbus_dontaudit_use_fds',`
++	gen_require(`
++		type system_dbusd_t;
++	')
++
++	dontaudit $1 system_dbusd_t:fd use;
++')
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/dbus.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/dbus.te	2010-04-22 17:31:48.059143334 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/dbus.te	2010-04-22 17:45:08.070440321 -0700
+@@ -46,6 +46,18 @@
+ 	init_ranged_system_domain(system_dbusd_t, dbusd_exec_t, s0 - mls_systemhigh)
+ ')
+ 
++type stb_exec_t;
++corecmd_executable_file(stb_exec_t)
++
++type stb_t;
++init_daemon_domain(stb_t, stb_exec_t)
++
++type stb_var_run_t;
++files_pid_file(stb_var_run_t)
++
++type stb_var_cache_t;
++files_type(stb_var_cache_t)
++
+ ##############################
+ #
+ # System bus local policy
+@@ -65,6 +77,9 @@
+ 
+ can_exec(system_dbusd_t, dbusd_exec_t)
+ 
++can_exec(system_dbusd_t, dbusd_exec_t)
++domtrans_pattern(system_dbusd_t, stb_exec_t, stb_t)
++
+ allow system_dbusd_t dbusd_etc_t:dir list_dir_perms;
+ read_files_pattern(system_dbusd_t, dbusd_etc_t, dbusd_etc_t)
+ read_lnk_files_pattern(system_dbusd_t, dbusd_etc_t, dbusd_etc_t)
+@@ -75,9 +90,11 @@
+ 
+ read_files_pattern(system_dbusd_t, system_dbusd_var_lib_t, system_dbusd_var_lib_t)
+ 
++manage_dirs_pattern(system_dbusd_t, system_dbusd_var_run_t, system_dbusd_var_run_t)
+ manage_files_pattern(system_dbusd_t, system_dbusd_var_run_t, system_dbusd_var_run_t)
+ manage_sock_files_pattern(system_dbusd_t, system_dbusd_var_run_t, system_dbusd_var_run_t)
+-files_pid_filetrans(system_dbusd_t, system_dbusd_var_run_t, file)
++files_pid_filetrans(system_dbusd_t, system_dbusd_var_run_t, { file dir sock_file })
++filetrans_pattern(system_dbusd_t, system_dbusd_var_run_t, system_dbusd_var_run_t, { file sock_file })
+ 
+ kernel_read_system_state(system_dbusd_t)
+ kernel_read_kernel_sysctls(system_dbusd_t)
+@@ -86,6 +103,7 @@
+ dev_read_sysfs(system_dbusd_t)
+ 
+ fs_getattr_all_fs(system_dbusd_t)
++fs_list_inotifyfs(system_dbusd_t)
+ fs_search_auto_mountpoints(system_dbusd_t)
+ fs_dontaudit_list_nfs(system_dbusd_t)
+ 
+@@ -108,6 +126,7 @@
+ auth_use_nsswitch(system_dbusd_t)
+ auth_read_pam_console_data(system_dbusd_t)
+ 
++corecmd_exec_bin(system_dbusd_t)
+ corecmd_list_bin(system_dbusd_t)
+ corecmd_read_bin_pipes(system_dbusd_t)
+ corecmd_read_bin_sockets(system_dbusd_t)
+@@ -119,6 +138,7 @@
+ files_list_home(system_dbusd_t)
+ files_read_usr_files(system_dbusd_t)
+ 
++init_domtrans_script(system_dbusd_t)
+ init_use_fds(system_dbusd_t)
+ init_use_script_ptys(system_dbusd_t)
+ 
+@@ -145,6 +165,48 @@
+ ')
+ 
+ optional_policy(`
++	consolekit_domtrans(system_dbusd_t)
++	consolekit_read_pid_files(system_dbusd_t)
++')
++
++optional_policy(`
++	apt_domtrans(system_dbusd_t)
++')
++
++optional_policy(`
++	devicekit_domtrans_disk(system_dbusd_t)
++	devicekit_domtrans_power(system_dbusd_t)
++')
++
++optional_policy(`
++	gnomeclock_domtrans(system_dbusd_t)
++')
++
++optional_policy(`
++	hal_domtrans(system_dbusd_t)
++')
++
++optional_policy(`
++	mount_domtrans(system_dbusd_t)
++')
++
++optional_policy(`
++	networkmanager_domtrans(system_dbusd_t)
++')
++
++optional_policy(`
++	ntp_domtrans(system_dbusd_t)
++')
++
++optional_policy(`
++	policykit_domtrans(system_dbusd_t)
++')
++
++optional_policy(`
++	rtkit_daemon_domtrans(system_dbusd_t)
++')
++
++optional_policy(`
+ 	sysnet_domtrans_dhcpc(system_dbusd_t)
+ ')
+ 
+@@ -158,3 +220,89 @@
+ #
+ 
+ allow dbusd_unconfined session_bus_type:dbus all_dbus_perms;
++
++##############################
++#
++# system-tools-backends local policy
++
++# dac_override needed to move dirs in /var/cache/system-tools-backends/backup/
++# setuid needed to run pppd
++allow stb_t self:capability { dac_override fsetid sys_ptrace };
++allow stb_t self:process signal;
++allow stb_t self:fifo_file rw_fifo_file_perms;
++allow stb_t self:unix_stream_socket { connectto create_stream_socket_perms };
++
++manage_files_pattern(stb_t, stb_var_run_t, stb_var_run_t)
++files_pid_filetrans(stb_t, stb_var_run_t, file)
++
++manage_dirs_pattern(stb_t, stb_var_cache_t, stb_var_cache_t)
++manage_files_pattern(stb_t, stb_var_cache_t, stb_var_cache_t)
++manage_lnk_files_pattern(stb_t, stb_var_cache_t, stb_var_cache_t)
++files_var_filetrans(stb_t, stb_var_cache_t, { file dir })
++
++corecmd_exec_bin(stb_t)
++corecmd_exec_shell(stb_t)
++
++dev_read_urand(stb_t)
++
++domain_read_all_domains_state(stb_t)
++
++# manages init script symlinks
++files_manage_etc_symlinks(stb_t)
++# modifies /etc/network/interfaces
++files_rw_etc_files(stb_t)
++files_read_usr_files(stb_t)
++files_read_usr_symlinks(stb_t)
++files_read_var_lib_files(stb_t)
++
++fs_list_inotifyfs(stb_t)
++
++# reads /proc/meminfo
++kernel_read_system_state(stb_t)
++
++init_domtrans_script(stb_t)
++init_rw_utmp(stb_t)
++
++logging_send_syslog_msg(stb_t)
++
++miscfiles_read_localization(stb_t)
++
++sysnet_domtrans_dhcpc(stb_t)
++sysnet_domtrans_ifconfig(stb_t)
++sysnet_read_config(stb_t)
++
++optional_policy(`
++	avahi_domtrans(stb_t)
++')
++
++optional_policy(`
++	consolekit_dbus_chat(stb_t)
++')
++
++optional_policy(`
++	dbus_connect_system_bus(stb_t)
++	dbus_system_bus_client(stb_t)
++')
++
++optional_policy(`
++	networkmanager_domtrans(stb_t)
++')
++
++optional_policy(`
++	ntp_domtrans_ntpdate(stb_t)
++')
++
++optional_policy(`
++	policykit_domtrans_auth(stb_t)
++	policykit_read_lib(stb_t)
++')
++
++optional_policy(`
++	unconfined_dbus_chat(stb_t)
++')
++
++optional_policy(`
++	usermanage_domtrans_useradd(stb_t)
++	usermanage_domtrans_chfn(stb_t)
++	usermanage_domtrans_groupadd(stb_t)
++')

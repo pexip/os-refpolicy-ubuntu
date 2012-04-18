@@ -1,0 +1,49 @@
+Description: Fix errors preventing policy build
+ checkpolicy version 2.1.0 changed the way the role-type rule works. It can no
+ longer be used to declare a role. It can only be used to associate a role with
+ types, so an explicit role declaration is now needed.
+ See: http://marc.info/?l=selinux&m=131250727712140&w=3
+ 
+ usermanage.te failed to build because an SELinux user was incorrectly being
+ passed to cron_role() when a role was expected. I suspect that the changes to
+ checkpolicy now catch this error whereas they did not before.
+Author: Tyler Hicks <tyhicks@canonical.com>
+Bug-Ubuntu: https://launchpad.net/bugs/935407
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/nx.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/nx.te	2012-04-18 13:57:32.000000000 -0500
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/nx.te	2012-04-18 14:02:32.269909501 -0500
+@@ -13,6 +13,7 @@
+ domain_user_exemption_target(nx_server_t)
+ # we need an extra role because nxserver is called from sshd
+ # cjp: do we really need this?
++role nx_server_r;
+ role nx_server_r types nx_server_t;
+ allow system_r nx_server_r;
+ 
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/unconfined.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/unconfined.te	2012-04-18 13:57:32.629902376 -0500
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/unconfined.te	2012-04-18 14:02:32.269909501 -0500
+@@ -22,6 +22,7 @@
+ type unconfined_execmem_t;
+ type unconfined_execmem_exec_t;
+ init_system_domain(unconfined_execmem_t, unconfined_execmem_exec_t)
++role unconfined_r;
+ role unconfined_r types unconfined_execmem_t;
+ 
+ ########################################
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/admin/usermanage.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/admin/usermanage.te	2012-04-18 13:57:32.557902374 -0500
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/admin/usermanage.te	2012-04-18 14:02:32.269909501 -0500
+@@ -525,7 +525,7 @@
+ 
+ optional_policy(`
+ 	# wants to run crontab when deleting a user
+-	cron_role(system_u, useradd_t)
++	cron_role(system_r, useradd_t)
+ ')
+ 
+ optional_policy(`

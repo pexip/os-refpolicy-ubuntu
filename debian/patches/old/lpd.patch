@@ -1,0 +1,31 @@
+/var/spool/cups-pdf needs to be labeled print_spool_t to allow cups to print to pdf.
+---
+ policy/modules/services/lpd.fc |    1 +
+ policy/modules/services/lpd.if |    3 ++-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+Index: refpolicy/policy/modules/services/lpd.fc
+===================================================================
+--- refpolicy.orig/policy/modules/services/lpd.fc
++++ refpolicy/policy/modules/services/lpd.fc
+@@ -28,5 +28,6 @@
+ # /var
+ #
+ /var/spool/cups(/.*)?		gen_context(system_u:object_r:print_spool_t,mls_systemhigh)
++/var/spool/cups-pdf(/.*)?	gen_context(system_u:object_r:print_spool_t,mls_systemhigh)
+ /var/spool/lpd(/.*)?		gen_context(system_u:object_r:print_spool_t,s0)
+ /var/run/lprng(/.*)?		gen_context(system_u:object_r:lpd_var_run_t,s0)
+Index: refpolicy/policy/modules/services/lpd.if
+===================================================================
+--- refpolicy.orig/policy/modules/services/lpd.if
++++ refpolicy/policy/modules/services/lpd.if
+@@ -339,7 +339,8 @@ interface(`lpd_manage_spool',`
+ 	manage_files_pattern($1,print_spool_t,print_spool_t)
+ 
+ 	# cjp: cups wants setattr
+-	allow $1 print_spool_t:dir setattr;
++	# ccc: cups-pdf wants create
++	allow $1 print_spool_t:dir {setattr create};
+ ')
+ 
+ ########################################

@@ -1,0 +1,113 @@
+---
+ build.conf                   |   12 ++++++------
+ config/appconfig-mcs/seusers |    4 ++--
+ policy/booleans.conf         |   12 ++++++------
+ 3 files changed, 14 insertions(+), 14 deletions(-)
+
+Index: refpolicy-ubuntu-0.2.20091117/build.conf
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/build.conf	2010-04-22 17:31:48.559319279 -0700
++++ refpolicy-ubuntu-0.2.20091117/build.conf	2010-04-22 17:45:07.910544848 -0700
+@@ -12,13 +12,13 @@
+ 
+ # Policy Type
+ # standard, mls, mcs
+-TYPE = standard
++TYPE = mcs
+ 
+ # Policy Name
+ # If set, this will be used as the policy
+ # name.  Otherwise the policy type will be
+ # used for the name.
+-NAME = refpolicy
++NAME = ubuntu
+ 
+ # Distribution
+ # Some distributions have portions of policy
+@@ -27,7 +27,7 @@
+ # for the distribution.
+ # redhat, gentoo, debian, suse, and rhel4 are current options.
+ # Fedora users should enable redhat.
+-#DISTRO = redhat
++DISTRO = ubuntu
+ 
+ # Unknown Permissions Handling
+ # The behavior for handling permissions defined in the
+@@ -35,18 +35,18 @@
+ # can either be allowed, denied, or the policy loading
+ # can be rejected.
+ # allow, deny, and reject are current options.
+-#UNK_PERMS = deny
++UNK_PERMS = allow
+ 
+ # Direct admin init
+ # Setting this will allow sysadm to directly
+ # run init scripts, instead of requring run_init.
+ # This is a build option, as role transitions do
+ # not work in conditional policy.
+-DIRECT_INITRC = n
++DIRECT_INITRC = y
+ 
+ # Build monolithic policy.  Putting n here
+ # will build a loadable module policy.
+-MONOLITHIC = y
++MONOLITHIC = n
+ 
+ # User-based access control (UBAC)
+ # Enable UBAC for role separations.
+Index: refpolicy-ubuntu-0.2.20091117/config/appconfig-mcs/seusers
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/config/appconfig-mcs/seusers	2010-04-22 17:31:48.569269127 -0700
++++ refpolicy-ubuntu-0.2.20091117/config/appconfig-mcs/seusers	2010-04-22 17:45:07.910544848 -0700
+@@ -1,3 +1,3 @@
+ system_u:system_u:s0-mcs_systemhigh
+-root:root:s0-mcs_systemhigh
+-__default__:user_u:s0
++root:unconfined_u:s0-mcs_systemhigh
++__default__:unconfined_u:s0-mcs_systemhigh
+Index: refpolicy-ubuntu-0.2.20091117/policy/booleans.conf
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/booleans.conf	2010-04-22 17:31:48.559319279 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/booleans.conf	2010-04-22 17:45:07.920512962 -0700
+@@ -405,12 +405,12 @@
+ #
+ # Enable support for upstart as the init program.
+ # 
+-init_upstart = false
++init_upstart = true
+ 
+ #
+ # Allow the mount command to mount any directory or file.
+ # 
+-allow_mount_anyfile = false
++allow_mount_anyfile = true
+ 
+ #
+ # Allow users to connect to mysql
+@@ -446,22 +446,22 @@
+ #
+ # Allow unconfined executables to make their heap memory executable.  Doing this is a really bad idea. Probably indicates a badly coded executable, but could indicate an attack. This executable should be reported in bugzilla
+ # 
+-allow_execheap = false
++allow_execheap = true
+ 
+ #
+ # Allow unconfined executables to map a memory region as both executable and writable, this is dangerous and the executable should be reported in bugzilla")
+ # 
+-allow_execmem = false
++allow_execmem = true
+ 
+ #
+ # Allow all unconfined executables to use libraries requiring text relocation that are not labeled textrel_shlib_t")
+ # 
+-allow_execmod = false
++allow_execmod = true
+ 
+ #
+ # Allow unconfined executables to make their stack executable.  This should never, ever be necessary. Probably indicates a badly coded executable, but could indicate an attack. This executable should be reported in bugzilla")
+ # 
+-allow_execstack = false
++allow_execstack = true
+ 
+ #
+ # Enable polyinstantiated directory support.

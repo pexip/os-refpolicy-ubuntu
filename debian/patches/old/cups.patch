@@ -1,0 +1,95 @@
+---
+ policy/modules/services/cups.te |   25 ++++++++++++++++++++++---
+ 1 file changed, 22 insertions(+), 3 deletions(-)
+
+Index: refpolicy/policy/modules/services/cups.te
+===================================================================
+--- refpolicy.orig/policy/modules/services/cups.te
++++ refpolicy/policy/modules/services/cups.te
+@@ -116,7 +116,7 @@ manage_files_pattern(cupsd_t,cupsd_tmp_t
+ manage_fifo_files_pattern(cupsd_t,cupsd_tmp_t,cupsd_tmp_t)
+ files_tmp_filetrans(cupsd_t, cupsd_tmp_t, { file dir fifo_file })
+ 
+-allow cupsd_t cupsd_var_run_t:dir setattr;
++allow cupsd_t cupsd_var_run_t:dir { create setattr };
+ manage_files_pattern(cupsd_t,cupsd_var_run_t,cupsd_var_run_t)
+ manage_sock_files_pattern(cupsd_t,cupsd_var_run_t,cupsd_var_run_t)
+ files_pid_filetrans(cupsd_t,cupsd_var_run_t,file)
+@@ -186,7 +186,7 @@ files_read_etc_runtime_files(cupsd_t)
+ # read python modules
+ files_read_usr_files(cupsd_t)
+ # for /var/lib/defoma
+-files_search_var_lib(cupsd_t)
++files_read_var_lib_files(cupsd_t)
+ files_list_world_readable(cupsd_t)
+ files_read_world_readable_files(cupsd_t)
+ files_read_world_readable_symlinks(cupsd_t)
+@@ -203,6 +203,7 @@ files_dontaudit_getattr_all_tmp_files(cu
+ selinux_compute_access_vector(cupsd_t)
+ 
+ init_exec_script_files(cupsd_t)
++init_stream_connect_script(cupsd_t)
+ 
+ auth_use_nsswitch(cupsd_t)
+ 
+@@ -221,13 +222,17 @@ miscfiles_read_fonts(cupsd_t)
+ seutil_read_config(cupsd_t)
+ 
+ sysnet_read_config(cupsd_t)
++sysnet_read_dhcpc_pid(cupsd_t)
+ 
+ userdom_dontaudit_use_unpriv_user_fds(cupsd_t)
+-userdom_dontaudit_search_all_users_home_content(cupsd_t)
++userdom_search_all_users_home_content(cupsd_t)
+ 
+ # Write to /var/spool/cups.
+ lpd_manage_spool(cupsd_t)
+ 
++# Access to generic pid files.
++files_read_generic_pids(cupsd_t)
++
+ ifdef(`enable_mls',`
+ 	lpd_relabel_spool(cupsd_t)
+ ')
+@@ -240,6 +245,10 @@ optional_policy(`
+ 	cron_system_entry(cupsd_t, cupsd_exec_t)
+ ')
+ 
++gen_require(`
++	class dbus all_dbus_perms;
++	type var_t, var_run_t;
++')
+ optional_policy(`
+ 	dbus_system_bus_client_template(cupsd,cupsd_t)
+ 
+@@ -248,6 +257,14 @@ optional_policy(`
+ 	optional_policy(`
+ 		hal_dbus_chat(cupsd_t)
+ 	')
++',`
++	allow {cupsd_t cupsd_config_t} domain:dbus all_dbus_perms;
++	allow domain {cupsd_t cupsd_config_t}:dbus all_dbus_perms;
++
++	# Allow cupsd_t access to /var/run/dbus/system_bus_socket
++	list_dirs_pattern(cupsd_t,var_t,var_run_t)
++        rw_files_pattern(cupsd_t,var_run_t,var_run_t)
++        rw_sock_files_pattern(cupsd_t,var_run_t,var_run_t)
+ ')
+ 
+ optional_policy(`
+@@ -559,6 +576,7 @@ logging_send_syslog_msg(hplip_t)
+ miscfiles_read_localization(hplip_t)
+ 
+ sysnet_read_config(hplip_t)
++sysnet_read_dhcpc_pid(hplip_t)
+ 
+ userdom_dontaudit_use_unpriv_user_fds(hplip_t)
+ userdom_dontaudit_search_sysadm_home_dirs(hplip_t)
+@@ -634,6 +652,7 @@ logging_send_syslog_msg(ptal_t)
+ miscfiles_read_localization(ptal_t)
+ 
+ sysnet_read_config(ptal_t)
++sysnet_read_dhcpc_pid(ptal_t)
+ 
+ userdom_dontaudit_use_unpriv_user_fds(ptal_t)
+ userdom_dontaudit_search_all_users_home_content(ptal_t)

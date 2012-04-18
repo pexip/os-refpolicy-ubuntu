@@ -1,0 +1,19 @@
+on ubuntu hardy there are binaries under /usr/lib/bluetooth/
+that start bluetooth services.  these files do not appear to be present
+on jaunty.
+---
+ policy/modules/services/bluetooth.te |    1 +
+ 1 file changed, 1 insertion(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/bluetooth.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/bluetooth.te	2010-04-22 17:31:47.969325609 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/bluetooth.te	2010-04-22 17:45:08.110419451 -0700
+@@ -58,6 +58,7 @@
+ dontaudit bluetooth_t self:capability sys_tty_config;
+ allow bluetooth_t self:process { getsched signal_perms };
+ allow bluetooth_t self:fifo_file rw_fifo_file_perms;
++allow bluetooth_t self:netlink_socket create_socket_perms;
+ allow bluetooth_t self:shm create_shm_perms;
+ allow bluetooth_t self:socket create_stream_socket_perms;
+ allow bluetooth_t self:unix_dgram_socket create_socket_perms;

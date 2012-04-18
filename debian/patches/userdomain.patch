@@ -1,0 +1,82 @@
+added an interface to allow a domain to send and recv dbus
+messages from all userdomains
+---
+ policy/modules/system/userdomain.fc |    7 ++++++
+ policy/modules/system/userdomain.if |   40 ++++++++++++++++++++++++++++++++++++
+ 2 files changed, 47 insertions(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/userdomain.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/userdomain.fc	2010-04-22 17:31:47.320507269 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/userdomain.fc	2010-04-22 17:45:08.280529004 -0700
+@@ -2,3 +2,9 @@
+ HOME_DIR/.+		gen_context(system_u:object_r:user_home_t,s0)
+ 
+ /tmp/gconfd-USER -d	gen_context(system_u:object_r:user_tmp_t,s0)
++
++/root/.*	unconfined_u:object_r:user_home_t:s0
++/root	-d	unconfined_u:object_r:user_home_dir_t:s0
++/root/lost\+found/.*	<<none>>
++/root/\.journal	<<none>>
++/root/lost\+found	-d	system_u:object_r:lost_found_t:s0
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/userdomain.if
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/userdomain.if	2010-04-22 17:31:47.310476190 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/userdomain.if	2010-04-22 17:45:08.280529004 -0700
+@@ -2920,6 +2920,24 @@
+ 
+ ########################################
+ ## <summary>
++##	Ptrace all user domains.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++#
++interface(`userdom_ptrace_all_users',`
++	gen_require(`
++		attribute userdomain;
++	')
++
++	allow $1 userdomain:process ptrace;
++')
++
++########################################
++## <summary>
+ ##	Read the process state of all user domains.
+ ## </summary>
+ ## <param name="domain">
+@@ -2934,6 +2952,7 @@
+ 	')
+ 
+ 	read_files_pattern($1, userdomain, userdomain)
++	read_lnk_files_pattern($1, userdomain, userdomain)
+ 	kernel_search_proc($1)
+ ')
+ 
+@@ -3064,3 +3083,23 @@
+ 
+ 	allow $1 userdomain:dbus send_msg;
+ ')
++
++########################################
++## <summary>
++##	Send and receive messages from all user domains over dbus.
++## </summary>
++## <param name="domain">
++##	<summary>
++##	Domain allowed access.
++##	</summary>
++## </param>
++#
++interface(`userdom_dbus_chat_all_users',`
++	gen_require(`
++		attribute userdomain;
++		class dbus send_msg;
++	')
++
++	allow $1 userdomain:dbus send_msg;
++	allow userdomain $1:dbus send_msg;
++')

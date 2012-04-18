@@ -1,0 +1,132 @@
+---
+ policy/modules/system/unconfined.te |   84 +++++++++++++++++++++++-------------
+ 1 file changed, 54 insertions(+), 30 deletions(-)
+
+Index: refpolicy/policy/modules/system/unconfined.te
+===================================================================
+--- refpolicy.orig/policy/modules/system/unconfined.te
++++ refpolicy/policy/modules/system/unconfined.te
+@@ -27,6 +27,11 @@ role unconfined_r types unconfined_execm
+ # Local policy
+ #
+ 
++# allow role transitions
++allow unconfined_r system_r;
++
++files_manage_all_files(unconfined_t)
++
+ domtrans_pattern(unconfined_t, unconfined_execmem_exec_t, unconfined_execmem_t)
+ 
+ files_create_boot_flag(unconfined_t)
+@@ -43,6 +48,8 @@ logging_run_auditctl(unconfined_t, uncon
+ 
+ mount_run_unconfined(unconfined_t, unconfined_r, { unconfined_devpts_t unconfined_tty_device_t })
+ 
++seutil_run_runinit(unconfined_t, unconfined_r, { unconfined_devpts_t unconfined_tty_device_t })
++seutil_run_loadpolicy(unconfined_t, unconfined_r, { unconfined_devpts_t unconfined_tty_device_t })
+ seutil_run_setfiles(unconfined_t, unconfined_r, { unconfined_devpts_t unconfined_tty_device_t })
+ seutil_run_semanage(unconfined_t, unconfined_r, { unconfined_devpts_t unconfined_tty_device_t })
+ 
+@@ -77,36 +84,41 @@ optional_policy(`
+ 
+ optional_policy(`
+ 	init_dbus_chat_script(unconfined_t)
++')
+ 
++optional_policy(`
+ 	dbus_stub(unconfined_t)
++',`
++	allow unconfined_t domain:dbus all_dbus_perms;
++	allow domain unconfined_t:dbus all_dbus_perms;
++')
++
++optional_policy(`
++	avahi_dbus_chat(unconfined_t)
++')
++
++optional_policy(`
++	bluetooth_dbus_chat(unconfined_t)
++')
++
++optional_policy(`
++	consolekit_dbus_chat(unconfined_t)
++')
+ 
+-	optional_policy(`
+-		avahi_dbus_chat(unconfined_t)
+-	')
+-
+-	optional_policy(`
+-		bluetooth_dbus_chat(unconfined_t)
+-	')
+-
+-	optional_policy(`
+-		consolekit_dbus_chat(unconfined_t)
+-	')
+-
+-	optional_policy(`
+-		cups_dbus_chat_config(unconfined_t)
+-	')
+-
+-	optional_policy(`
+-		hal_dbus_chat(unconfined_t)
+-	')
+-
+-	optional_policy(`
+-		networkmanager_dbus_chat(unconfined_t)
+-	')
+-
+-	optional_policy(`
+-		oddjob_dbus_chat(unconfined_t)
+-	')
++optional_policy(`
++	cups_dbus_chat_config(unconfined_t)
++')
++
++optional_policy(`
++	hal_dbus_chat(unconfined_t)
++')
++
++optional_policy(`
++	networkmanager_dbus_chat(unconfined_t)
++')
++
++optional_policy(`
++	oddjob_dbus_chat(unconfined_t)
+ ')
+ 
+ optional_policy(`
+@@ -212,6 +224,10 @@ optional_policy(`
+ 	xserver_domtrans_xdm_xserver(unconfined_t)
+ ')
+ 
++optional_policy(`
++	ssh_write_sshd(unconfined_t)
++')
++
+ ########################################
+ #
+ # Unconfined Execmem Local policy
+@@ -222,11 +238,19 @@ unconfined_domain_noaudit(unconfined_exe
+ 
+ optional_policy(`
+ 	dbus_stub(unconfined_execmem_t)
++',`
++	allow unconfined_execmem_t domain:dbus all_dbus_perms;
++')
+ 
++optional_policy(`
+ 	init_dbus_chat_script(unconfined_execmem_t)
++')
++
++optional_policy(`
+ 	unconfined_dbus_chat(unconfined_execmem_t)
++')
+ 
+-	optional_policy(`
+-		hal_dbus_chat(unconfined_execmem_t)
+-	')
++optional_policy(`
++	hal_dbus_chat(unconfined_execmem_t)
+ ')
++

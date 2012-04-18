@@ -1,0 +1,40 @@
+---
+ policy/modules/services/ssh.fc |    2 ++
+ policy/modules/services/ssh.te |    6 ++++++
+ 2 files changed, 8 insertions(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/ssh.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/ssh.fc	2010-04-22 17:31:48.189299232 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/ssh.fc	2010-04-22 17:45:08.020684764 -0700
+@@ -1,4 +1,6 @@
+ HOME_DIR/\.ssh(/.*)?			gen_context(system_u:object_r:home_ssh_t,s0)
++/root/\.ssh(/.*)?			gen_context(unconfined_u:object_r:home_ssh_t,s0)
++
+ 
+ /etc/ssh/primes			--	gen_context(system_u:object_r:sshd_key_t,s0)
+ /etc/ssh/ssh_host_key 		--	gen_context(system_u:object_r:sshd_key_t,s0)
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/services/ssh.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/services/ssh.te	2010-04-22 17:31:48.199258886 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/services/ssh.te	2010-04-22 17:45:08.020684764 -0700
+@@ -310,6 +310,8 @@
+ corenet_tcp_bind_xserver_port(sshd_t)
+ corenet_sendrecv_xserver_server_packets(sshd_t)
+ 
++userdom_dbus_chat_all_users(sshd_t)
++
+ tunable_policy(`ssh_sysadm_login',`
+ 	# Relabel and access ptys created by sshd
+ 	# ioctl is necessary for logout() processing for utmp entry and for w to
+@@ -323,6 +325,10 @@
+ ')
+ 
+ optional_policy(`
++	consolekit_dbus_chat(sshd_t)
++')
++
++optional_policy(`
+ 	daemontools_service_domain(sshd_t, sshd_exec_t)
+ ')
+ 

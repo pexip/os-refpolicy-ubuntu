@@ -1,0 +1,32 @@
+---
+ policy/modules/system/mount.fc |    1 +
+ policy/modules/system/mount.te |    7 +++++++
+ 2 files changed, 8 insertions(+)
+
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/mount.fc
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/mount.fc	2010-04-22 17:31:46.900600664 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/mount.fc	2010-04-22 17:45:08.440470988 -0700
+@@ -2,3 +2,4 @@
+ /bin/umount.*			--	gen_context(system_u:object_r:mount_exec_t,s0)
+ 
+ /usr/bin/fusermount		--	gen_context(system_u:object_r:mount_exec_t,s0)
++/sbin/mountall			--	gen_context(system_u:object_r:mount_exec_t,s0)
+Index: refpolicy-ubuntu-0.2.20091117/policy/modules/system/mount.te
+===================================================================
+--- refpolicy-ubuntu-0.2.20091117.orig/policy/modules/system/mount.te	2010-04-22 17:31:46.890466350 -0700
++++ refpolicy-ubuntu-0.2.20091117/policy/modules/system/mount.te	2010-04-22 17:45:08.440470988 -0700
+@@ -193,7 +193,13 @@
+ # Unconfined mount local policy
+ #
+ 
++unconfined_dbus_chat(unconfined_mount_t)
++
+ optional_policy(`
+ 	files_etc_filetrans_etc_runtime(unconfined_mount_t, file)
+ 	unconfined_domain(unconfined_mount_t)
+ ')
++
++optional_policy(`
++	hal_dbus_chat(unconfined_mount_t)
++')

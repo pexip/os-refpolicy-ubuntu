@@ -1,0 +1,10 @@
+Index: refpolicy-stable/policy/policy_capabilities
+===================================================================
+--- refpolicy-stable.orig/policy/policy_capabilities	2009-03-06 15:06:14.000000000 -0500
++++ refpolicy-stable/policy/policy_capabilities	2009-03-06 15:07:45.000000000 -0500
+@@ -29,4 +29,4 @@
+ # chr_file: open
+ # blk_file: open
+ #
+-policycap open_perms;
++#policycap open_perms;
