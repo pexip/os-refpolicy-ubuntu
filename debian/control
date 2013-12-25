@@ -1,11 +1,13 @@
 Source: refpolicy-ubuntu
 Section: admin
 Priority: optional
-Maintainer: Ubuntu Hardened Developers <ubuntu-hardened@lists.ubuntu.com>
+Maintainer: Pexip AS <packaging@pexip.com>
+XSBC-Pexip-Original-Maintainer: Ubuntu Hardened Developers <ubuntu-hardened@lists.ubuntu.com>
 XSBC-Original-Maintainer: Caleb Case <ccase@tresys.com>
 Build-Depends: cdbs, debhelper (>= 7), policycoreutils (>= 2.0.35), checkpolicy (>= 2.0.7), python, m4, bzip2, gawk
 Standards-Version: 3.8.4
 Homepage: http://oss.tresys.com/projects/refpolicy
+XS-Pexip-Upstream: http://archive.ubuntu.com/ubuntu/ precise
 
 Package: selinux-policy-ubuntu
 Architecture: all
