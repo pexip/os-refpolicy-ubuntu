@@ -1,0 +1,211 @@
+
+policy_module(nagios, 1.8.0)
+
+########################################
+#
+# Declarations
+#
+
+type nagios_t;
+type nagios_exec_t;
+init_daemon_domain(nagios_t, nagios_exec_t)
+
+type nagios_cgi_t;
+type nagios_cgi_exec_t;
+init_system_domain(nagios_cgi_t, nagios_cgi_exec_t)
+
+type nagios_etc_t;
+files_config_file(nagios_etc_t)
+
+type nagios_log_t;
+logging_log_file(nagios_log_t)
+
+type nagios_tmp_t;
+files_tmp_file(nagios_tmp_t)
+
+type nagios_var_run_t;
+files_pid_file(nagios_var_run_t)
+
+type nrpe_t;
+type nrpe_exec_t;
+init_daemon_domain(nrpe_t, nrpe_exec_t)
+
+type nrpe_etc_t;
+files_config_file(nrpe_etc_t)
+
+########################################
+#
+# Nagios local policy
+#
+
+allow nagios_t self:capability { dac_override setgid setuid };
+dontaudit nagios_t self:capability sys_tty_config;
+allow nagios_t self:process { setpgid signal_perms };
+allow nagios_t self:fifo_file rw_file_perms;
+allow nagios_t self:tcp_socket create_stream_socket_perms;
+allow nagios_t self:udp_socket create_socket_perms;
+
+read_files_pattern(nagios_t, nagios_etc_t, nagios_etc_t)
+read_lnk_files_pattern(nagios_t, nagios_etc_t, nagios_etc_t)
+allow nagios_t nagios_etc_t:dir list_dir_perms;
+
+manage_files_pattern(nagios_t, nagios_log_t, nagios_log_t)
+manage_fifo_files_pattern(nagios_t, nagios_log_t, nagios_log_t)
+logging_log_filetrans(nagios_t, nagios_log_t, { file dir })
+
+manage_dirs_pattern(nagios_t, nagios_tmp_t, nagios_tmp_t)
+manage_files_pattern(nagios_t, nagios_tmp_t, nagios_tmp_t)
+files_tmp_filetrans(nagios_t, nagios_tmp_t, { file dir })
+
+manage_files_pattern(nagios_t, nagios_var_run_t, nagios_var_run_t)
+files_pid_filetrans(nagios_t, nagios_var_run_t, file)
+
+kernel_read_system_state(nagios_t)
+kernel_read_kernel_sysctls(nagios_t)
+
+corecmd_exec_bin(nagios_t)
+corecmd_exec_shell(nagios_t)
+
+corenet_all_recvfrom_unlabeled(nagios_t)
+corenet_all_recvfrom_netlabel(nagios_t)
+corenet_tcp_sendrecv_generic_if(nagios_t)
+corenet_udp_sendrecv_generic_if(nagios_t)
+corenet_tcp_sendrecv_generic_node(nagios_t)
+corenet_udp_sendrecv_generic_node(nagios_t)
+corenet_tcp_sendrecv_all_ports(nagios_t)
+corenet_udp_sendrecv_all_ports(nagios_t)
+corenet_tcp_connect_all_ports(nagios_t)
+
+dev_read_sysfs(nagios_t)
+dev_read_urand(nagios_t)
+
+domain_use_interactive_fds(nagios_t)
+# for ps
+domain_read_all_domains_state(nagios_t)
+
+files_read_etc_files(nagios_t)
+files_read_etc_runtime_files(nagios_t)
+files_read_kernel_symbol_table(nagios_t)
+
+fs_getattr_all_fs(nagios_t)
+fs_search_auto_mountpoints(nagios_t)
+
+# for who
+init_read_utmp(nagios_t)
+
+auth_use_nsswitch(nagios_t)
+
+logging_send_syslog_msg(nagios_t)
+
+miscfiles_read_localization(nagios_t)
+
+userdom_dontaudit_use_unpriv_user_fds(nagios_t)
+userdom_dontaudit_search_user_home_dirs(nagios_t)
+
+mta_send_mail(nagios_t)
+
+optional_policy(`
+	netutils_domtrans_ping(nagios_t)
+	netutils_signal_ping(nagios_t)
+	netutils_kill_ping(nagios_t)
+')
+
+optional_policy(`
+	seutil_sigchld_newrole(nagios_t)
+')
+
+optional_policy(`
+	udev_read_db(nagios_t)
+')
+
+# cjp: leaked file descriptors:
+# for open file handles
+#dontaudit system_mail_t nagios_etc_t:file read;
+#dontaudit system_mail_t nagios_log_t:fifo_file read;
+
+########################################
+#
+# Nagios CGI local policy
+#
+
+allow nagios_cgi_t self:process signal_perms;
+allow nagios_cgi_t self:fifo_file rw_fifo_file_perms;
+
+read_files_pattern(nagios_cgi_t, nagios_t, nagios_t)
+read_lnk_files_pattern(nagios_cgi_t, nagios_t, nagios_t)
+
+allow nagios_cgi_t nagios_etc_t:dir list_dir_perms;
+read_files_pattern(nagios_cgi_t, nagios_etc_t, nagios_etc_t)
+read_lnk_files_pattern(nagios_cgi_t, nagios_etc_t, nagios_etc_t)
+
+allow nagios_cgi_t nagios_log_t:dir list_dir_perms;
+read_files_pattern(nagios_cgi_t, nagios_etc_t, nagios_log_t)
+read_lnk_files_pattern(nagios_cgi_t, nagios_etc_t, nagios_log_t)
+
+kernel_read_system_state(nagios_cgi_t)
+
+corecmd_exec_bin(nagios_cgi_t)
+
+domain_dontaudit_read_all_domains_state(nagios_cgi_t)
+
+files_read_etc_files(nagios_cgi_t)
+files_read_etc_runtime_files(nagios_cgi_t)
+files_read_kernel_symbol_table(nagios_cgi_t)
+
+logging_send_syslog_msg(nagios_cgi_t)
+logging_search_logs(nagios_cgi_t)
+
+miscfiles_read_localization(nagios_cgi_t)
+
+optional_policy(`
+	apache_append_log(nagios_cgi_t)
+')
+
+########################################
+#
+# Nagios remote plugin executor local policy
+#
+
+dontaudit nrpe_t self:capability sys_tty_config;
+allow nrpe_t self:process { setpgid signal_perms };
+allow nrpe_t self:fifo_file rw_fifo_file_perms;
+
+allow nrpe_t nrpe_etc_t:file read_file_perms;
+files_search_etc(nrpe_t)
+
+kernel_read_system_state(nrpe_t)
+kernel_read_kernel_sysctls(nrpe_t)
+
+corecmd_exec_bin(nrpe_t)
+corecmd_exec_shell(nrpe_t)
+
+dev_read_sysfs(nrpe_t)
+dev_read_urand(nrpe_t)
+
+domain_use_interactive_fds(nrpe_t)
+
+files_read_etc_runtime_files(nrpe_t)
+
+fs_search_auto_mountpoints(nrpe_t)
+
+logging_send_syslog_msg(nrpe_t)
+
+miscfiles_read_localization(nrpe_t)
+
+userdom_dontaudit_use_unpriv_user_fds(nrpe_t)
+
+optional_policy(`
+	inetd_tcp_service_domain(nrpe_t, nrpe_exec_t)
+')
+
+optional_policy(`
+	seutil_sigchld_newrole(nrpe_t)
+')
+
+optional_policy(`
+	tcpd_wrapped_domain(nrpe_t, nrpe_exec_t)
+')
+
+optional_policy(`
+	udev_read_db(nrpe_t)
+')

@@ -1,0 +1,19 @@
+## <summary>NX remote desktop</summary>
+
+########################################
+## <summary>
+##	Transition to NX server.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`nx_spec_domtrans_server',`
+	gen_require(`
+		type nx_server_t, nx_server_exec_t;
+	')
+
+	spec_domtrans_pattern($1, nx_server_exec_t, nx_server_t)
+')

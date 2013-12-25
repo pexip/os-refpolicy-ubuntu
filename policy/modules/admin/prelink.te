@@ -1,0 +1,103 @@
+
+policy_module(prelink, 1.8.0)
+
+########################################
+#
+# Declarations
+
+attribute prelink_object;
+
+type prelink_t;
+type prelink_exec_t;
+init_system_domain(prelink_t, prelink_exec_t)
+domain_obj_id_change_exemption(prelink_t)
+
+type prelink_cache_t;
+files_type(prelink_cache_t)
+
+type prelink_log_t;
+logging_log_file(prelink_log_t)
+
+type prelink_tmp_t;
+files_tmp_file(prelink_tmp_t)
+
+type prelink_var_lib_t;
+files_tmp_file(prelink_var_lib_t)
+
+########################################
+#
+# Local policy
+#
+
+allow prelink_t self:capability { chown dac_override fowner fsetid sys_resource };
+allow prelink_t self:process { execheap execmem execstack signal };
+allow prelink_t self:fifo_file rw_fifo_file_perms;
+
+allow prelink_t prelink_cache_t:file manage_file_perms;
+files_etc_filetrans(prelink_t, prelink_cache_t, file)
+files_var_lib_filetrans(prelink_t, prelink_cache_t, file)
+
+allow prelink_t prelink_log_t:dir setattr;
+create_files_pattern(prelink_t, prelink_log_t, prelink_log_t)
+append_files_pattern(prelink_t, prelink_log_t, prelink_log_t)
+read_lnk_files_pattern(prelink_t, prelink_log_t, prelink_log_t)
+logging_log_filetrans(prelink_t, prelink_log_t, file)
+
+allow prelink_t prelink_tmp_t:file { manage_file_perms execute relabelfrom execmod };
+files_tmp_filetrans(prelink_t, prelink_tmp_t, file)
+fs_tmpfs_filetrans(prelink_t, prelink_tmp_t, file)
+
+manage_dirs_pattern(prelink_t, prelink_var_lib_t, prelink_var_lib_t)
+manage_files_pattern(prelink_t, prelink_var_lib_t, prelink_var_lib_t)
+files_search_var_lib(prelink_t)
+
+# prelink misc objects that are not system
+# libraries or entrypoints
+allow prelink_t prelink_object:file { manage_file_perms execute relabelto relabelfrom };
+
+kernel_read_system_state(prelink_t)
+kernel_read_kernel_sysctls(prelink_t)
+
+corecmd_manage_all_executables(prelink_t)
+corecmd_relabel_all_executables(prelink_t)
+corecmd_mmap_all_executables(prelink_t)
+corecmd_read_bin_symlinks(prelink_t)
+
+dev_read_urand(prelink_t)
+
+files_list_all(prelink_t)
+files_getattr_all_files(prelink_t)
+files_write_non_security_dirs(prelink_t)
+files_read_etc_files(prelink_t)
+files_read_etc_runtime_files(prelink_t)
+files_dontaudit_read_all_symlinks(prelink_t)
+files_manage_usr_files(prelink_t)
+files_manage_var_files(prelink_t)
+files_relabelfrom_usr_files(prelink_t)
+
+fs_getattr_xattr_fs(prelink_t)
+
+selinux_get_enforce_mode(prelink_t)
+
+libs_exec_ld_so(prelink_t)
+libs_manage_ld_so(prelink_t)
+libs_relabel_ld_so(prelink_t)
+libs_manage_shared_libs(prelink_t)
+libs_relabel_shared_libs(prelink_t)
+libs_delete_lib_symlinks(prelink_t)
+
+miscfiles_read_localization(prelink_t)
+
+userdom_use_user_terminals(prelink_t)
+
+optional_policy(`
+	amanda_manage_lib(prelink_t)
+')
+
+optional_policy(`
+	cron_system_entry(prelink_t, prelink_exec_t)
+')
+
+optional_policy(`
+	unconfined_domain(prelink_t)
+')

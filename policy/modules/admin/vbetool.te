@@ -1,0 +1,36 @@
+
+policy_module(vbetool, 1.4.0)
+
+########################################
+#
+# Declarations
+#
+
+type vbetool_t;
+type vbetool_exec_t;
+init_system_domain(vbetool_t, vbetool_exec_t)
+
+########################################
+#
+# Local policy
+#
+
+allow vbetool_t self:capability { sys_tty_config sys_admin };
+allow vbetool_t self:process execmem;
+
+dev_wx_raw_memory(vbetool_t)
+dev_read_raw_memory(vbetool_t)
+dev_rwx_zero(vbetool_t)
+dev_read_sysfs(vbetool_t)
+
+domain_mmap_low(vbetool_t)
+
+term_use_unallocated_ttys(vbetool_t)
+
+miscfiles_read_localization(vbetool_t)
+
+optional_policy(`
+	hal_rw_pid_files(vbetool_t)
+	hal_write_log(vbetool_t)
+	hal_dontaudit_append_lib_files(vbetool_t)
+')

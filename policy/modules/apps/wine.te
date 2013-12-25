@@ -1,0 +1,28 @@
+
+policy_module(wine, 1.6.0)
+
+########################################
+#
+# Declarations
+#
+
+type wine_t;
+type wine_exec_t;
+application_domain(wine_t, wine_exec_t)
+
+########################################
+#
+# Local policy
+#
+
+userdom_use_user_terminals(wine_t)
+
+optional_policy(`
+	allow wine_t self:process { execstack execmem execheap };
+	unconfined_domain_noaudit(wine_t)
+	files_execmod_all_files(wine_t)
+
+ 	optional_policy(`
+ 		hal_dbus_chat(wine_t)
+ 	')
+')
